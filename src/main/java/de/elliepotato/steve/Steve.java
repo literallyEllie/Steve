@@ -2,7 +2,9 @@ package de.elliepotato.steve;
 
 import de.elliepotato.steve.antispam.MessageChecker;
 import de.elliepotato.steve.cmd.CommandManager;
+import de.elliepotato.steve.cmd.CustomCommandManager;
 import de.elliepotato.steve.config.JSONConfig;
+import de.elliepotato.steve.mysql.MySQLManager;
 import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.*;
@@ -10,12 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.awt.Color;
 
 /**
  * @author Ellie for VentureNode LLC
@@ -33,6 +35,8 @@ public class Steve {
     private JDA jda;
 
     private CommandManager commandManager;
+    private MySQLManager sqlManager;
+    private CustomCommandManager customCommandManager;
 
     /**
      * A project for the hosting companies MelonCube and BisectHosting.
@@ -68,7 +72,6 @@ public class Steve {
      */
     private void init() {
         final long start = System.currentTimeMillis();
-
 
         // Get config values
         config = new JSONConfig();
@@ -112,6 +115,9 @@ public class Steve {
             return;
         }
 
+        this.sqlManager = new MySQLManager(this);
+        this.customCommandManager = new CustomCommandManager(this);
+
         LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) +  "ms.");
     }
 
@@ -123,9 +129,17 @@ public class Steve {
      */
     public void shutdown(int... exitCode) {
 
-        commandManager.shutdown();
+        if (commandManager != null)
+            commandManager.shutdown();
 
-        jda.shutdown();
+        if (customCommandManager != null)
+            customCommandManager.shutdown();
+
+        if (sqlManager != null)
+            sqlManager.shutdown();
+
+        if (jda != null)
+            jda.shutdown();
 
         LOGGER.info("Bye bye!");
         System.exit((exitCode.length == 0 ? 0 : exitCode[0]));
@@ -167,6 +181,20 @@ public class Steve {
     }
 
     /**
+     * @return The custom command manager.
+     */
+    public CustomCommandManager getCustomCommandManager() {
+        return customCommandManager;
+    }
+
+    /**
+     * @return The SQL manager.
+     */
+    public MySQLManager getSqlManager() {
+        return sqlManager;
+    }
+
+    /**
      * Message a discord channel
      * @param channel Channel ID
      * @param message Message to send
@@ -190,7 +218,9 @@ public class Steve {
      * @param message embed to send
      */
     public void messageChannel(long channel, MessageEmbed message) {
-        jda.getTextChannelById(channel).sendMessage(message).queue();
+        if (jda.getTextChannelById(channel) != null) {
+            jda.getTextChannelById(channel).sendMessage(message).queue();
+        }
     }
 
     /**

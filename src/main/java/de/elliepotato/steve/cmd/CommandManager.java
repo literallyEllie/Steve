@@ -3,9 +3,15 @@ package de.elliepotato.steve.cmd;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.cmd.model.Command;
+import de.elliepotato.steve.cmd.model.CommandEnvironment;
+import de.elliepotato.steve.cmd.model.CustomCommand;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
-import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -36,7 +42,7 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
         this.commandMap = Maps.newHashMap();
         this.stopMessagingMeMemory = Sets.newHashSet();
 
-        new Reflections("de.elliepotato.steve.cmd").getSubTypesOf(Command.class).forEach(aClass -> {
+        new Reflections("de.elliepotato.steve.cmd.commands").getSubTypesOf(Command.class).forEach(aClass -> {
             try {
                 if (aClass != CustomCommand.class) {
                     Command command = (Command) aClass.getConstructors()[0].newInstance(bot);
@@ -76,8 +82,6 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
         if (!msg.startsWith(bot.getConfig().getCommandPrefix())
                 || msg.length() <= bot.getConfig().getCommandPrefix().length()) return; // block out unrelated messages or just "!" messages
 
-        System.out.println(1);
-
         final Guild guild = event.getGuild();
 
         if (guild.getIdLong() != Constants.GUILD_BISECT.getIdLong()
@@ -90,19 +94,17 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
         final String[] argsWLabel = msg.substring(bot.getConfig().getCommandPrefix().length()).split(" ");
 
-        // TODO custom commands
+        // TODO impl custom commands support
         final Command command = getCommand(argsWLabel[0], true);
         if (command == null) return;
 
         String[] argsNoLabel = null;
         if (argsWLabel.length > 1) {
-
             argsNoLabel = new String[argsWLabel.length - 1];
             System.arraycopy(argsWLabel, 1, argsNoLabel, 0, argsNoLabel.length);
         }
 
-
-        command.execute(new CommandEnvironment(command, member, event.getChannel(), message, (argsNoLabel == null ? argsWLabel : argsNoLabel)));
+        command.execute(new CommandEnvironment(command, member, event.getChannel(), message, (argsNoLabel == null ? new String[0] : argsNoLabel)));
     }
 
     /**

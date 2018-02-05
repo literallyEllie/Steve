@@ -20,6 +20,12 @@ public class JSONConfig {
     @JSONField(key = "gameOf") private String gameOf;
     @JSONField(key = "botStatus") private String botStatus;
 
+    @JSONField(key = "sql-host") private String sqlHost;
+    @JSONField(key = "sql-port") private int sqlPort;
+    @JSONField(key = "sql-database") private String sqlDatabase;
+    @JSONField(key = "sql-username") private String sqlUsername;
+    @JSONField(key = "sql-password") private String sqlPassword;
+
     /**
      * A JSON config handler
      */
@@ -44,7 +50,11 @@ public class JSONConfig {
                 .put("gameType", "DEFAULT")
                 .put("gameOf", "Test test 123!")
                 .put("botStatus", OnlineStatus.ONLINE.getKey())
-
+                .put("sql-host", "localhost")
+                .put("sql-port", 3306)
+                .put("sql-database", "database")
+                .put("sql-username", "username")
+                .put("sql-password", "passord")
                 ;
 
         final BufferedWriter writer = new BufferedWriter(new FileWriter(file));
@@ -118,6 +128,41 @@ public class JSONConfig {
      */
     public String getBotStatus() {
         return botStatus;
+    }
+
+    /**
+     * @return The SQL host to connect to (i.e localhost).
+     */
+    public String getSqlHost() {
+        return sqlHost;
+    }
+
+    /**
+     * @return The port to connect to the database with (i.e 3306).
+     */
+    public int getSqlPort() {
+        return sqlPort;
+    }
+
+    /**
+     * @return The SQL database to connect to.
+     */
+    public String getSqlDatabase() {
+        return sqlDatabase;
+    }
+
+    /**
+     * @return The SQL username to use when logging in.
+     */
+    public String getSqlUsername() {
+        return sqlUsername;
+    }
+
+    /**
+     * @return The SQL password to use when logging in.
+     */
+    public String getSqlPassword() {
+        return sqlPassword;
     }
 
     /**

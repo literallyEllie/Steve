@@ -90,6 +90,7 @@ public class MessageChecker extends ListenerAdapter {
 
     public boolean advertCheck(Message message) {
         String content = message.getContentRaw();
+        // if channel isnt advertise channel
         final boolean strict = message.getChannel().getIdLong() != Constants.CHAT_BISECT_AD.getIdLong() &&
                 message.getChannel().getIdLong() != Constants.CHAT_MELON_AD.getIdLong();
 
@@ -99,13 +100,14 @@ public class MessageChecker extends ListenerAdapter {
         while (matcher.find()) {
             lineBreaks++;
 
-            if (lineBreaks > MAX_AD_LINE) {
+            if (lineBreaks > MAX_AD_LINE && strict) {
 
                 bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "Your advert is too long, please reconsider the size to make it smaller." +
-                        " If you want your advert back, please contact a Discord Mod", 10, null);
+                        " If you want your advert back, please check your PMs.", 10, null);
+                bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" +message.getContentRaw() + "```");
 
                 message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines)", message.getTextChannel())));
-                return false;
+              return false;
             }
 
         }
@@ -116,12 +118,15 @@ public class MessageChecker extends ListenerAdapter {
 
             String domain = matcher.group().replace("www.", "").toLowerCase();
 
-            // DEBUG
+            if (allowedDomains.contains(domain)) continue;
 
-            System.out.println(domain);
-            if (allowedDomains.contains(domain)) {
-                System.out.println("OK");
-            } else System.out.println("NOT OK!");
+            // if they aren't in a advert room, be strict!
+            if (strict) {
+                bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a non-authorised link, if you want to share links" +
+                        " please say it in PMs. If you want your message back, please ask staff.", 10, null);
+                message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advertising in #" + message.getChannel().getName(), message.getTextChannel())));
+                return false;
+            }
 
         }
 

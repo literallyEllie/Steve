@@ -1,4 +1,4 @@
-package de.elliepotato.steve.cmd
+package de.elliepotato.steve.cmd.model
 
 import com.google.common.base.Joiner
 import net.dv8tion.jda.core.entities.Member

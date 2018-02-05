@@ -1,5 +1,6 @@
-package de.elliepotato.steve.cmd
+package de.elliepotato.steve.cmd.model
 
+import com.google.common.base.Joiner
 import com.google.common.collect.Lists
 import de.elliepotato.steve.Steve
 import net.dv8tion.jda.core.Permission
@@ -10,10 +11,10 @@ import net.dv8tion.jda.core.utils.PermissionUtil
  * @author Ellie for VentureNode LLC
  * at 03/02/2018
  */
-abstract class Command(val bot: Steve, val label: String, val description: String, val aliases: List<String> = Lists.newArrayList(),
+abstract class Command(val bot: Steve, val label: String, var description: String, val aliases: List<String> = Lists.newArrayList(),
                        val permission: Permission = Permission.MESSAGE_WRITE, val usage: List<String> = Lists.newArrayList()) {
 
-    private val minArgs: Int
+    val minArgs: Int
 
     init {
         minArgs = usage.stream().filter({ s -> s.contains("<") }).count().toInt()
@@ -42,7 +43,7 @@ abstract class Command(val bot: Steve, val label: String, val description: Strin
             bot.logger.info(environment.toString())
             abstractExecute(environment)
         } catch (ex: Throwable) {
-            bot.messageChannel(environment.channel, ":x: Error whilst executed that command (${ex.message})")
+            bot.messageChannel(environment.channel, ":x: Error whilst executing that command (${ex.message})")
             bot.logger.error("Failed to execute command $label!")
             ex.printStackTrace()
         }
@@ -52,6 +53,6 @@ abstract class Command(val bot: Steve, val label: String, val description: Strin
     /**
      * A method to simply return the usage of the command, to be posted.
      */
-    private fun correctUsage() = ":thumbsup: Correct usage: $label $usage **-** $description."
+    fun correctUsage(moreStuff: String = "") = ":thumbsup: Correct usage: ${bot.config.commandPrefix}$label ${Joiner.on(", ").join(usage)} $moreStuff **-** $description."
 
 }
