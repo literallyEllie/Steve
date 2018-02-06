@@ -43,10 +43,10 @@ public class CustomCommandManager implements DataHolder {
             while (resultSet.next()) {
                 final long guild = resultSet.getLong("guild");
                 final String label = resultSet.getString("label");
-                final String description = resultSet.getString("label");
+                final String description = resultSet.getString("description");
                 final String response = resultSet.getString("response");
 
-                final CustomCommand customCommand = new CustomCommand(steve, label, (description == null ? "None provided" : description), response);
+                final CustomCommand customCommand = new CustomCommand(steve, label, (description == null ? "None provided" : description), guild, response);
                 addCustomCommand(guild, customCommand, false);
             }
             resultSet.close();
@@ -127,8 +127,6 @@ public class CustomCommandManager implements DataHolder {
             else newCustomCommands.get(guildId).put(customCommand.getLabel().toLowerCase(), customCommand);
         }
 
-        steve.getCommandManager().getCommandMap().put(customCommand.getLabel(), customCommand);
-
         if (!customCommands.containsKey(guildId)) {
             Map<String, CustomCommand> customCommandMap = Maps.newHashMap();
             customCommandMap.put(customCommand.getLabel().toLowerCase(), customCommand);
@@ -153,7 +151,6 @@ public class CustomCommandManager implements DataHolder {
     public void deleteCustomCommand(long guildId, String label) {
         if (newCustomCommands.containsKey(guildId) && newCustomCommands.get(guildId).containsKey(label.toLowerCase())) {
             newCustomCommands.get(guildId).remove(label.toLowerCase());
-            return;
         }
 
         if (!customCommands.containsKey(guildId)) return;

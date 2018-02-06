@@ -94,9 +94,25 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
         final String[] argsWLabel = msg.substring(bot.getConfig().getCommandPrefix().length()).split(" ");
 
-        // TODO impl custom commands support
         final Command command = getCommand(argsWLabel[0], true);
-        if (command == null) return;
+        if (command == null) {
+            // try for custom commands
+
+            final CustomCommand customCommand = getBot().getCustomCommandManager().getCustomCommandsOf(event.getGuild().getIdLong()).get(argsWLabel[0].toLowerCase());
+
+            if (customCommand != null) {
+                String[] argsNoLabel = null;
+                // rip
+                if (argsWLabel.length > 1) {
+                    argsNoLabel = new String[argsWLabel.length - 1];
+                    System.arraycopy(argsWLabel, 1, argsNoLabel, 0, argsNoLabel.length);
+                }
+
+                customCommand.execute(new CommandEnvironment(customCommand, member, event.getChannel(), message, (argsNoLabel == null ? new String[0] : argsNoLabel)));
+            }
+
+            return;
+        }
 
         String[] argsNoLabel = null;
         if (argsWLabel.length > 1) {

@@ -53,6 +53,7 @@ abstract class Command(val bot: Steve, val label: String, var description: Strin
     /**
      * A method to simply return the usage of the command, to be posted.
      */
-    fun correctUsage(moreStuff: String = "") = ":thumbsup: Correct usage: ${bot.config.commandPrefix}$label ${Joiner.on(", ").join(usage)} $moreStuff **-** $description."
+    fun correctUsage(moreStuff: String = "") = ":thumbsup: Correct usage: `${bot.config.commandPrefix}$label " +
+            "${if (moreStuff.isEmpty()) Joiner.on(", ").join(usage) else moreStuff}` **-** $description."
 
 }

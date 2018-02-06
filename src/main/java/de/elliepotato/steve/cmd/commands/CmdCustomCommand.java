@@ -36,7 +36,7 @@ public class CmdCustomCommand extends Command {
             case "create":
                 // cc create <name> <response>
                 if (args.length < getMinArgs() + 2) {
-                    getBot().messageChannel(channel, correctUsage("<name> --<description> --<response>"));
+                    getBot().messageChannel(channel, correctUsage("create <name> --<description> --<response>"));
                     return;
                 }
 
@@ -60,11 +60,11 @@ public class CmdCustomCommand extends Command {
                     description = parts[1].trim();
                     response = parts[2].trim();    // Lazy ezpz :D
                 } else {
-                    getBot().messageChannel(channel, correctUsage("<name> --<description> --<response>"));
+                    getBot().messageChannel(channel, correctUsage("create <name> --<description> --<response>"));
                     return;
                 }
 
-                final CustomCommand customCommand = new CustomCommand(getBot(), label, description, response);
+                final CustomCommand customCommand = new CustomCommand(getBot(), label, description, channel.getGuild().getIdLong(), response);
                 getBot().getCustomCommandManager().addCustomCommand(channel.getGuild().getIdLong(), customCommand, true);
 
                 getBot().messageChannel(environment.getChannel(), getBot().getEmbedBuilder(Steve.DiscordColor.NEUTRAL)
@@ -77,7 +77,7 @@ public class CmdCustomCommand extends Command {
             case "delete":
                 // "cc delete <name>"
                 if (args.length < getMinArgs() + 1) {
-                    getBot().messageChannel(channel, correctUsage("<name>"));
+                    getBot().messageChannel(channel, correctUsage("create <name>"));
                     return;
                 }
                 label = args[1].toLowerCase();
@@ -95,7 +95,7 @@ public class CmdCustomCommand extends Command {
             case "set":
                 // "cc set <name> <type> <value>"
                 if (args.length < getMinArgs() + 3) {
-                    getBot().messageChannel(channel, correctUsage("<name> <" + Joiner.on(" | ").join(CustomCommandValue.values()) + "> <value>"));
+                    getBot().messageChannel(channel, correctUsage("set <name> <" + Joiner.on(" | ").join(CustomCommandValue.values()) + "> <value>"));
                     return;
                 }
 
