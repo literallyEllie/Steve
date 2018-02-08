@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 public class Steve {
 
     public static final String VERSION = "1.0-RELEASE";
+    public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger("Steve");
 
