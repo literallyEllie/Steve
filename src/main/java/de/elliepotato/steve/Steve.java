@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 public class Steve {
 
     public static final String VERSION = "1.0-RELEASE";
+    public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger("Steve");
 
@@ -48,23 +49,23 @@ public class Steve {
      * Since they both share the same parent company (VentureNode LLC), it was thought
      * a good name for the bot was to be Steve, as suggested by the CEO.
      * However this name wasn't available, so it was chosen for Steve-0 instead.
-     *
+     * <p>
      * MelonCube: https://www.meloncube.net/
      * BisectHosting: https://www.bisecthosting.com/
-     *
+     * <p>
      * The project is a joint Java-Kotlin project, most object models due to the nature of Kotlin
      * making it more efficient to do.
-     *
+     * <p>
      * This bot has no official affiliation with the the company and was simply created
      * in the light of volunteering to help improve the community and ease moderation.
-     *
+     * <p>
      * The bot will contain:
-     *      - Custom commands;
-     *      - Auto-moderation (i.e Spam detection);
-     *      - Knowledge-Base quick searcher;
-     *      - <i>More to be decided...</i>
-     *
-     *
+     * - Custom commands;
+     * - Auto-moderation (i.e Spam detection);
+     * - Knowledge-Base quick searcher;
+     * - <i>More to be decided...</i>
+     * <p>
+     * <p>
      * Created to help :)
      */
     Steve() {
@@ -123,7 +124,7 @@ public class Steve {
         this.sqlManager = new MySQLManager(this);
         this.customCommandManager = new CustomCommandManager(this);
 
-        LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) +  "ms. Console thread starting.");
+        LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) + "ms. Console thread starting.");
         this.steveConsole = new SteveConsole(this);
         steveConsole.run();
 
@@ -131,6 +132,7 @@ public class Steve {
 
     /**
      * Shut down the bot safely then exits the program.
+     *
      * @param exitCode What the program's exit code will be.
      *                 A Java "optional variable", if no input, it will be 0
      *                 Else, will be the first entry to the array.
@@ -213,6 +215,7 @@ public class Steve {
 
     /**
      * Message a discord channel
+     *
      * @param channel Channel ID
      * @param message Message to send
      */
@@ -222,6 +225,7 @@ public class Steve {
 
     /**
      * Message any channel that implements {@link Channel}
+     *
      * @param channel Channel ID
      * @param message Message to send
      */
@@ -231,6 +235,7 @@ public class Steve {
 
     /**
      * Message a discord channel
+     *
      * @param channel Channel ID
      * @param message embed to send
      */
@@ -242,6 +247,7 @@ public class Steve {
 
     /**
      * Message any channel that implements {@link Channel}
+     *
      * @param channel Channel ID
      * @param message embed to send
      */
@@ -251,8 +257,9 @@ public class Steve {
 
     /**
      * Send a temporary message to a discord channel
-     * @param channel The channel to send to
-     * @param message The message content
+     *
+     * @param channel    The channel to send to
+     * @param message    The message content
      * @param expireTime After what delay should the message be deleted
      */
     public void tempMessage(long channel, String message, int expireTime, Message cleanupMsg) {
@@ -264,17 +271,19 @@ public class Steve {
 
     /**
      * Send a temporary message to a discord channel that implements {@link Channel} (aka all of them)
-     * @param channel The channel to send to
-     * @param message The message content
+     *
+     * @param channel    The channel to send to
+     * @param message    The message content
      * @param expireTime After what delay should the message be deleted
      */
-    public void tempMessage(Channel channel, String message, int expireTime,  Message cleanupMsg) {
+    public void tempMessage(Channel channel, String message, int expireTime, Message cleanupMsg) {
         tempMessage(channel.getIdLong(), message, expireTime, cleanupMsg);
     }
 
     /**
      * Send a private message to a user
-     * @param user User to message
+     *
+     * @param user    User to message
      * @param content the message content
      */
     public void privateMessage(User user, String content) {
@@ -283,7 +292,8 @@ public class Steve {
 
     /**
      * Send a private message to a member
-     * @param member Member to message
+     *
+     * @param member  Member to message
      * @param content the message content
      */
     public void privateMessage(Member member, String content) {
@@ -292,7 +302,8 @@ public class Steve {
 
     /**
      * Log a moderation action performed by the bot.
-     * @param guild The guild to mod log to.
+     *
+     * @param guild        The guild to mod log to.
      * @param embedBuilder The embed to log
      */
     public void modLog(Guild guild, EmbedBuilder embedBuilder) {
@@ -301,9 +312,10 @@ public class Steve {
 
     /**
      * Get the default embed builder.
+     *
      * @param discordColor The color for the side bit to be
      * @return A embed builder set with a timestamp, color of choose
-     *          and footer of "AssimilationMC Development Team" and a lovely cake picture.
+     * and footer of "AssimilationMC Development Team" and a lovely cake picture.
      */
     public EmbedBuilder getEmbedBuilder(DiscordColor discordColor) {
         return new EmbedBuilder()
@@ -320,9 +332,7 @@ public class Steve {
 
         MESSAGE_DELETE(new Color(32, 73, 155)),
 
-        NEUTRAL(new Color(24, 165, 45))
-
-        ;
+        NEUTRAL(new Color(24, 165, 45));
 
         private Color color;
 

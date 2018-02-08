@@ -14,17 +14,27 @@ import java.io.*;
  */
 public class JSONConfig {
 
-    @JSONField(key = "botToken") private String botToken;
-    @JSONField(key = "commandPrefix") private String commandPrefix;
-    @JSONField(key = "gameType") private String gameType;
-    @JSONField(key = "gameOf") private String gameOf;
-    @JSONField(key = "botStatus") private String botStatus;
+    @JSONField(key = "botToken")
+    private String botToken;
+    @JSONField(key = "commandPrefix")
+    private String commandPrefix;
+    @JSONField(key = "gameType")
+    private String gameType;
+    @JSONField(key = "gameOf")
+    private String gameOf;
+    @JSONField(key = "botStatus")
+    private String botStatus;
 
-    @JSONField(key = "sql-host") private String sqlHost;
-    @JSONField(key = "sql-port") private int sqlPort;
-    @JSONField(key = "sql-database") private String sqlDatabase;
-    @JSONField(key = "sql-username") private String sqlUsername;
-    @JSONField(key = "sql-password") private String sqlPassword;
+    @JSONField(key = "sql-host")
+    private String sqlHost;
+    @JSONField(key = "sql-port")
+    private int sqlPort;
+    @JSONField(key = "sql-database")
+    private String sqlDatabase;
+    @JSONField(key = "sql-username")
+    private String sqlUsername;
+    @JSONField(key = "sql-password")
+    private String sqlPassword;
 
     /**
      * A JSON config handler
@@ -34,9 +44,10 @@ public class JSONConfig {
 
     /**
      * Creates a template JSON config to fill out.
+     *
      * @param file The file to create.
      * @throws IOException Exception that will be throw if file null, error creating or writing to.
-     *                      not handled here as can't log.
+     *                     not handled here as can't log.
      */
     public void create(File file) throws IOException {
         Preconditions.checkNotNull(file, "Specified file to write to cannot be null");
@@ -54,8 +65,7 @@ public class JSONConfig {
                 .put("sql-port", 3306)
                 .put("sql-database", "database")
                 .put("sql-username", "username")
-                .put("sql-password", "passord")
-                ;
+                .put("sql-password", "passord");
 
         final BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(template.marshal());
@@ -65,12 +75,12 @@ public class JSONConfig {
 
     /**
      * Loads the configuration into memory.
+     *
      * @param file File to read from.
      * @return a new config instance
-     * @throws IOException Exception that will be throw if file null or problem reading from file or error from "create".
-     *                      not handled here as can't log.
+     * @throws IOException          Exception that will be throw if file null or problem reading from file or error from "create".
+     *                              not handled here as can't log.
      * @throws NullPointerException if a config value is null, hence not valid.
-     *
      */
     public JSONConfig load(File file) throws IOException {
         Preconditions.checkNotNull(file, "Specified load file cannot be null");
@@ -167,7 +177,8 @@ public class JSONConfig {
 
     /**
      * Check if the config instance to see if valid or not.
-     * @throws NullPointerException If a value of the config is null. (Hence invalid)
+     *
+     * @throws NullPointerException     If a value of the config is null. (Hence invalid)
      * @throws IllegalArgumentException If a value of the config is not acceptable. (Hence invalid)
      */
     public void validate() throws NullPointerException, IllegalArgumentException {

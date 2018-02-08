@@ -35,6 +35,7 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
     /**
      * Manager to handle commands and borrowed methods from other Discord projects.
+     *
      * @param ventureBot The bot instance.
      */
     public CommandManager(Steve ventureBot) {
@@ -80,7 +81,8 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
         final String msg = message.getContentRaw();
 
         if (!msg.startsWith(bot.getConfig().getCommandPrefix())
-                || msg.length() <= bot.getConfig().getCommandPrefix().length()) return; // block out unrelated messages or just "!" messages
+                || msg.length() <= bot.getConfig().getCommandPrefix().length())
+            return; // block out unrelated messages or just "!" messages
 
         final Guild guild = event.getGuild();
 
@@ -90,7 +92,8 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
 
         final Member member = event.getMember();
-        if (member.getUser().getIdLong() == Constants.PRESUMED_SELF.getIdLong() || member.getUser().isBot()) return; // dont reply to self or bots.
+        if (member.getUser().getIdLong() == Constants.PRESUMED_SELF.getIdLong() || member.getUser().isBot())
+            return; // dont reply to self or bots.
 
         final String[] argsWLabel = msg.substring(bot.getConfig().getCommandPrefix().length()).split(" ");
 
@@ -139,6 +142,7 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
     /**
      * Command getter
+     *
      * @param label The command label/input string
      * @param alias Should it check aliases of commands too
      * @return A {@link Command} if found, else: null.

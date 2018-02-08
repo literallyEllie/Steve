@@ -40,6 +40,7 @@ public class MySQLManager implements DataHolder {
 
     /**
      * Gets the connection
+     *
      * @return The datasource connection
      * @throws SQLException if there is a problem lol.
      */

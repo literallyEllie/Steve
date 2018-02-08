@@ -17,10 +17,8 @@ import java.util.Map;
  */
 public class CustomCommandManager implements DataHolder {
 
-    private Steve steve;
-
     private final static String TABLE = "steve_custom_commands";
-
+    private Steve steve;
     private Map<Long, Map<String, CustomCommand>> customCommands;
     private Map<Long, Map<String, CustomCommand>> newCustomCommands;
 
@@ -31,12 +29,12 @@ public class CustomCommandManager implements DataHolder {
 
         try (Connection connection = steve.getSqlManager().getConnection()) {
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS `" + TABLE + "` (" +
-            "`id` INT(100) NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
-            "`guild` BIGINT NOT NULL, " +
-            "`label` TEXT NOT NULL, " +
-            "`description` TEXT NULL, " +
-            "`response` TEXT NULL, " +
-            "INDEX(guild)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1").execute();
+                    "`id` INT(100) NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
+                    "`guild` BIGINT NOT NULL, " +
+                    "`label` TEXT NOT NULL, " +
+                    "`description` TEXT NULL, " +
+                    "`response` TEXT NULL, " +
+                    "INDEX(guild)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1").execute();
 
 
             final ResultSet resultSet = connection.prepareStatement("SELECT * FROM `" + TABLE + "`").executeQuery();
@@ -52,7 +50,7 @@ public class CustomCommandManager implements DataHolder {
             resultSet.close();
 
         } catch (SQLException e) {
-            steve.getLogger().error("Failed to setup custom commands!" , e);
+            steve.getLogger().error("Failed to setup custom commands!", e);
             e.printStackTrace();
         }
     }
@@ -66,7 +64,7 @@ public class CustomCommandManager implements DataHolder {
                 newCustomCommands.forEach((guildId, customCommandMap) -> customCommandMap.values().forEach(customCommand -> {
                     try {
                         PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `" + TABLE + "` (guild, label, description, response) VALUES "
-                         + "(?, ?, ?, ?)");
+                                + "(?, ?, ?, ?)");
                         preparedStatement.setLong(1, guildId);
                         preparedStatement.setString(2, customCommand.getLabel().toLowerCase());
                         preparedStatement.setString(3, customCommand.getDescription());
@@ -108,9 +106,10 @@ public class CustomCommandManager implements DataHolder {
 
     /**
      * Add a custom command.
-     * @param guildId The owner of the custom command.
+     *
+     * @param guildId       The owner of the custom command.
      * @param customCommand The custom command object to register.
-     * @param newCommand Is the command a new command or not? (i.e created/edited during session)
+     * @param newCommand    Is the command a new command or not? (i.e created/edited during session)
      */
     public void addCustomCommand(long guildId, CustomCommand customCommand, boolean newCommand) {
 
@@ -120,11 +119,9 @@ public class CustomCommandManager implements DataHolder {
                 Map<String, CustomCommand> customCommandMap = Maps.newHashMap();
                 customCommandMap.put(customCommand.getLabel().toLowerCase(), customCommand);
                 newCustomCommands.put(guildId, customCommandMap);
-            }
-            else if (newCustomCommands.get(guildId).containsKey(customCommand.getLabel().toLowerCase())) {
+            } else if (newCustomCommands.get(guildId).containsKey(customCommand.getLabel().toLowerCase())) {
                 newCustomCommands.get(guildId).replace(customCommand.getLabel().toLowerCase(), customCommand);
-            }
-            else newCustomCommands.get(guildId).put(customCommand.getLabel().toLowerCase(), customCommand);
+            } else newCustomCommands.get(guildId).put(customCommand.getLabel().toLowerCase(), customCommand);
         }
 
         if (!customCommands.containsKey(guildId)) {
@@ -145,8 +142,9 @@ public class CustomCommandManager implements DataHolder {
 
     /**
      * Delete a custom command; unloads from local cache and deletes remotely.
+     *
      * @param guildId The owner of the custom command
-     * @param label The label of the custom command to delete.
+     * @param label   The label of the custom command to delete.
      */
     public void deleteCustomCommand(long guildId, String label) {
         if (newCustomCommands.containsKey(guildId) && newCustomCommands.get(guildId).containsKey(label.toLowerCase())) {

@@ -20,13 +20,10 @@ import java.util.regex.Pattern;
  */
 public class MessageChecker extends ListenerAdapter {
 
-    private Steve bot;
-
     private final int MAX_MESSAGE_TAG = 8;
     private final int MAX_AD_LINE = 7; // line breaks
-
     private final Pattern REGEX_DOMAIN = Pattern.compile("\b((?=[a-z0-9-]{1,63}\\.)(xn--)?([a-z0-9]+(-[a-z0-9]+)*\\.))+[a-z]{2,63}\b");
-
+    private Steve bot;
     private Set<String> allowedDomains = Sets.newHashSet("hastebin.com", "pastebin.com", "google.com", "google.co.uk", "google.no",
             "meloncube.net", "bisecthosting.com", "discord.gg", "discordapp.com", "dis.gd", "discord.co", "discord.com", "spigotmc.org",
             "bukkit.org", "minecraft.net", "mojang.com", "minecraftforge.net", "wikipedia.org", "stackoverflow.com", "prnt.sc", "imgur.com",
@@ -41,11 +38,11 @@ public class MessageChecker extends ListenerAdapter {
         if (event.getAuthor().isBot() || event.getAuthor().getIdLong() == Constants.PRESUMED_SELF.getIdLong()) return;
 
         long channelId = event.getChannel().getIdLong();
-        if (channelId == Constants.CHAT_BISECT_STAFF.getIdLong() || channelId == Constants.CHAT_MELON_STAFF.getIdLong()) return;
+        if (channelId == Constants.CHAT_BISECT_STAFF.getIdLong() || channelId == Constants.CHAT_MELON_STAFF.getIdLong())
+            return;
 
         if (!tagCheck(event.getMessage())) return;
         if (!advertCheck(event.getMessage())) return;
-
 
         // ...
     }
@@ -104,10 +101,10 @@ public class MessageChecker extends ListenerAdapter {
 
                 bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "Your advert is too long, please reconsider the size to make it smaller." +
                         " If you want your advert back, please check your PMs.", 10, null);
-                bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" +message.getContentRaw() + "```");
+                bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" + message.getContentRaw() + "```");
 
                 message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines)", message.getTextChannel())));
-              return false;
+                return false;
             }
 
         }
@@ -115,7 +112,6 @@ public class MessageChecker extends ListenerAdapter {
         matcher = REGEX_DOMAIN.matcher(content);
 
         while (matcher.find()) {
-
             String domain = matcher.group().replace("www.", "").toLowerCase();
 
             if (allowedDomains.contains(domain)) continue;
@@ -133,14 +129,12 @@ public class MessageChecker extends ListenerAdapter {
         return true;
     }
 
-
     private EmbedBuilder embedMessageDelete(Message message, String reason, TextChannel channel) {
         final User author = message.getAuthor();
         return bot.getEmbedBuilder(Steve.DiscordColor.MESSAGE_DELETE)
                 .setTitle("Deleted message from " + author.getName() + "#" + author.getDiscriminator() + " (" + author.getIdLong() + ")" +
-                " in channel #" + channel.getName()).addField("Message content:" , message.getContentRaw(), false)
+                        " in channel #" + channel.getName()).addField("Message content:", message.getContentRaw(), false)
                 .addField("Reason:", reason, false);
     }
-
 
 }

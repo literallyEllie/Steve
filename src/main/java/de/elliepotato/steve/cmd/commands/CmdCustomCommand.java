@@ -127,7 +127,7 @@ public class CmdCustomCommand extends Command {
                 final Map<String, CustomCommand> guildCommandMap = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong());
 
                 EmbedBuilder embedBuilder = getBot().getEmbedBuilder(Steve.DiscordColor.NEUTRAL)
-                        .setTitle("Guild commands (" + (guildCommandMap != null ? guildCommandMap.size() : 0)  + ")");
+                        .setTitle("Guild commands (" + (guildCommandMap != null ? guildCommandMap.size() : 0) + ")");
 
                 // meh @ pagination
                 if (guildCommandMap != null) {
@@ -136,8 +136,8 @@ public class CmdCustomCommand extends Command {
 
                 getBot().messageChannel(channel.getIdLong(), embedBuilder.build());
                 break;
-                default:
-                    getBot().messageChannel(channel, correctUsage(""));
+            default:
+                getBot().messageChannel(channel, correctUsage(""));
         }
 
     }
@@ -161,9 +161,7 @@ public class CmdCustomCommand extends Command {
     enum CustomCommandValue {
 
         DESCRIPTION,
-        RESPONSE
-
-        ;
+        RESPONSE;
 
         public static CustomCommandValue fromString(String input) {
             for (CustomCommandValue customCommandValue : values()) {

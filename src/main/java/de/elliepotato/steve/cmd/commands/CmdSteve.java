@@ -1,5 +1,6 @@
 package de.elliepotato.steve.cmd.commands;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
@@ -23,9 +24,9 @@ public class CmdSteve extends Command {
                 .setTitle("Steve v" + Steve.VERSION)
                 .setDescription("Hi !I am Steve-0, a chat moderation bot who does various other things as well." +
                         "If you are a user you will probably not need to worry about me, if I have mis-moderated please tell a Discord moderator!")
-                .addField("", "For BisectHosting and MelonCube", false)
+                .addField("For BisectHosting and MelonCube.", "", false)
                 .addField("Source (contribute :D)", "https://github.com/literallyEllie/Steve", false)
-                .addField("Author", "Ellie#0006", false)
+                .addField("Author", Joiner.on(", ").join(Steve.AUTHORS), false)
                 .build();
     }
 
