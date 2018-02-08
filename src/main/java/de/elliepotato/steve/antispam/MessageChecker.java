@@ -25,7 +25,7 @@ public class MessageChecker extends ListenerAdapter {
     private final int MAX_MESSAGE_TAG = 8;
     private final int MAX_AD_LINE = 7; // line breaks
 
-    private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?([a-z0-9]+(-[a-z0-9]+)*\\.))+[a-z]{2,63}\\b");
+    private final Pattern REGEX_DOMAIN = Pattern.compile("\b((?=[a-z0-9-]{1,63}\\.)(xn--)?([a-z0-9]+(-[a-z0-9]+)*\\.))+[a-z]{2,63}\b");
 
     private Set<String> allowedDomains = Sets.newHashSet("hastebin.com", "pastebin.com", "google.com", "google.co.uk", "google.no",
             "meloncube.net", "bisecthosting.com", "discord.gg", "discordapp.com", "dis.gd", "discord.co", "discord.com", "spigotmc.org",

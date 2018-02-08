@@ -4,6 +4,7 @@ import de.elliepotato.steve.antispam.MessageChecker;
 import de.elliepotato.steve.cmd.CommandManager;
 import de.elliepotato.steve.cmd.CustomCommandManager;
 import de.elliepotato.steve.config.JSONConfig;
+import de.elliepotato.steve.console.SteveConsole;
 import de.elliepotato.steve.mysql.MySQLManager;
 import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.core.*;
@@ -25,6 +26,8 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
+    public static final String VERSION = "1.0-RELEASE";
+
     private final Logger LOGGER = LoggerFactory.getLogger("Steve");
 
     private final Pattern PATTERN_USER = Pattern.compile("<@!?([0-9]+)>");
@@ -37,6 +40,8 @@ public class Steve {
     private CommandManager commandManager;
     private MySQLManager sqlManager;
     private CustomCommandManager customCommandManager;
+
+    private SteveConsole steveConsole;
 
     /**
      * A project for the hosting companies MelonCube and BisectHosting.
@@ -118,7 +123,10 @@ public class Steve {
         this.sqlManager = new MySQLManager(this);
         this.customCommandManager = new CustomCommandManager(this);
 
-        LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) +  "ms.");
+        LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) +  "ms. Console thread starting.");
+        this.steveConsole = new SteveConsole(this);
+        steveConsole.run();
+
     }
 
     /**
@@ -140,6 +148,15 @@ public class Steve {
 
         if (jda != null)
             jda.shutdown();
+
+        if (steveConsole != null) {
+            try {
+                steveConsole.join();
+            } catch (InterruptedException e) {
+                LOGGER.error("Failed to terminate console thread!", e);
+                e.printStackTrace();
+            }
+        }
 
         LOGGER.info("Bye bye!");
         System.exit((exitCode.length == 0 ? 0 : exitCode[0]));

@@ -42,17 +42,18 @@ public class CmdCustomCommand extends Command {
 
                 String label = args[1].toLowerCase();
 
-                Map<String, CustomCommand> customCommandMap = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong());
+                if (getBot().getCommandManager().getCommand(label, true) != null) {
+                    getBot().tempMessage(channel, sender.getAsMention() + ", the command name `" + label + "` is reserved.", 7, null);
+                    return;
+                }
+
+                final Map<String, CustomCommand> customCommandMap = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong());
                 if (customCommandMap != null && customCommandMap.containsKey(label)) {
                     getBot().tempMessage(channel, sender.getAsMention() + ", the custom command by `" + label + "` already exist on this server.", 7, null);
                     return;
                 }
 
                 final String[] parts = UtilString.getFinalArg(args, 2).split("--");
-
-                for (String part : parts) {
-                    System.out.println("`" + part + "`");
-                }
 
                 String description;
                 String response;
