@@ -9,6 +9,8 @@ import de.elliepotato.steve.mysql.MySQLManager;
 import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.exceptions.ErrorResponseException;
+import net.dv8tion.jda.core.utils.PermissionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.0-RELEASE";
+    public static final String VERSION = "1.1-RELEASE";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger("Steve");
@@ -264,7 +266,11 @@ public class Steve {
      */
     public void tempMessage(long channel, String message, int expireTime, Message cleanupMsg) {
         jda.getTextChannelById(channel).sendMessage(message).queue(message1 -> {
-            message1.delete().queueAfter(expireTime, TimeUnit.SECONDS);
+            try {
+                message1.delete().queueAfter(expireTime, TimeUnit.SECONDS);
+            } catch (ErrorResponseException ignored) {
+                // if message deletes before we get to it!
+            }
             if (cleanupMsg != null) cleanupMsg.delete().queueAfter(expireTime, TimeUnit.SECONDS);
         });
     }
@@ -307,7 +313,7 @@ public class Steve {
      * @param embedBuilder The embed to log
      */
     public void modLog(Guild guild, EmbedBuilder embedBuilder) {
-        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.GUILD_BISECT.getIdLong() : Constants.GUILD_MELON.getIdLong()), embedBuilder.build());
+        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.CHAT_BISECT_STAFF.getIdLong() : Constants.CHAT_MELON_STAFF.getIdLong()), embedBuilder.build());
     }
 
     /**

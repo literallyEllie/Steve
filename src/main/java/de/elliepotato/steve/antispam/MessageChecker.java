@@ -22,15 +22,22 @@ public class MessageChecker extends ListenerAdapter {
 
     private final int MAX_MESSAGE_TAG = 8;
     private final int MAX_AD_LINE = 7; // line breaks
-    private final Pattern REGEX_DOMAIN = Pattern.compile("\b((?=[a-z0-9-]{1,63}\\.)(xn--)?([a-z0-9]+(-[a-z0-9]+)*\\.))+[a-z]{2,63}\b");
+    private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?([a-z0-9]+(-[a-z0-9]+)*\\.))+[a-z]{2,63}\\b");
     private Steve bot;
     private Set<String> allowedDomains = Sets.newHashSet("hastebin.com", "pastebin.com", "google.com", "google.co.uk", "google.no",
             "meloncube.net", "bisecthosting.com", "discord.gg", "discordapp.com", "dis.gd", "discord.co", "discord.com", "spigotmc.org",
             "bukkit.org", "minecraft.net", "mojang.com", "minecraftforge.net", "wikipedia.org", "stackoverflow.com", "prnt.sc", "imgur.com",
-            "strawpoll.me", "strawpoll.com", "github.com", "mc-market.org", "ess3.net", "filezilla-project.org", "youtube.com");
+            "strawpoll.me", "strawpoll.com", "github.com", "mc-market.org", "ess3.net", "filezilla-project.org", "youtube.com", "mc-ess.net");
 
+    private MessageHistory messageHistory;
+
+    /**
+     * The big bad chat moderating module.
+     * @param bot The bot instance.
+     */
     public MessageChecker(Steve bot) {
         this.bot = bot;
+        this.messageHistory = new MessageHistory(bot);
     }
 
     @Override
@@ -43,10 +50,16 @@ public class MessageChecker extends ListenerAdapter {
 
         if (!tagCheck(event.getMessage())) return;
         if (!advertCheck(event.getMessage())) return;
+        if (!messageHistory.call(event.getMessage())) return;
 
         // ...
     }
 
+    /**
+     * Check the message for any tag spamming
+     * @param message The message to check
+     * @return "true" if they are safe, "false" if they got rekt.
+     */
     private boolean tagCheck(Message message) {
         String content = message.getContentRaw();
 
@@ -85,6 +98,11 @@ public class MessageChecker extends ListenerAdapter {
         return true;
     }
 
+    /**
+     * Check if the message contains a bad advertisement and also check the message length of a potential advertisement.
+     * @param message Message to check.
+     * @return "true" if they are safe, "false" if they got rekt.
+     */
     public boolean advertCheck(Message message) {
         String content = message.getContentRaw();
         // if channel isnt advertise channel
@@ -93,34 +111,36 @@ public class MessageChecker extends ListenerAdapter {
 
         Matcher matcher = Pattern.compile("\n").matcher(content);
 
-        int lineBreaks = 0;
-        while (matcher.find()) {
-            lineBreaks++;
+        // stop unnessary check, "if channel is an advert channel"
+        if (!strict) {
+            int lineBreaks = 0;
+            while (matcher.find()) {
+                lineBreaks++;
+                if (lineBreaks > MAX_AD_LINE) {
 
-            if (lineBreaks > MAX_AD_LINE && strict) {
+                    bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "Your advert is too long, please reconsider the size to make it smaller." +
+                            " If you want your advert back, please check your PMs.", 10, null);
+                    bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" + message.getContentRaw() + "```");
 
-                bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "Your advert is too long, please reconsider the size to make it smaller." +
-                        " If you want your advert back, please check your PMs.", 10, null);
-                bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" + message.getContentRaw() + "```");
+                    message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines)", message.getTextChannel())));
+                    return false;
+                }
 
-                message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines)", message.getTextChannel())));
-                return false;
             }
+            // if channel isn't an advert channel
+        } else {
 
-        }
+            matcher = REGEX_DOMAIN.matcher(content);
 
-        matcher = REGEX_DOMAIN.matcher(content);
+            while (matcher.find()) {
+                String domain = matcher.group().replace("www.", "").toLowerCase();
 
-        while (matcher.find()) {
-            String domain = matcher.group().replace("www.", "").toLowerCase();
+                if (allowedDomains.contains(domain)) continue;
 
-            if (allowedDomains.contains(domain)) continue;
-
-            // if they aren't in a advert room, be strict!
-            if (strict) {
+                // if they aren't in a advert room, be strict!
                 bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a non-authorised link, if you want to share links" +
                         " please say it in PMs. If you want your message back, please ask staff.", 10, null);
-                message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advertising in #" + message.getChannel().getName(), message.getTextChannel())));
+                message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advertising (unauthorised link) in #" + message.getChannel().getName(), message.getTextChannel())));
                 return false;
             }
 
@@ -129,6 +149,13 @@ public class MessageChecker extends ListenerAdapter {
         return true;
     }
 
+    /**
+     * Quick embed builder getter
+     * @param message Message deleted
+     * @param reason Reason message was deleted
+     * @param channel Channel message was deleted from
+     * @return The embed builder template, with the title and reason filled in.
+     */
     private EmbedBuilder embedMessageDelete(Message message, String reason, TextChannel channel) {
         final User author = message.getAuthor();
         return bot.getEmbedBuilder(Steve.DiscordColor.MESSAGE_DELETE)
