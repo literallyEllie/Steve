@@ -307,7 +307,7 @@ public class Steve {
      * @param embedBuilder The embed to log
      */
     public void modLog(Guild guild, EmbedBuilder embedBuilder) {
-        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.GUILD_BISECT.getIdLong() : Constants.GUILD_MELON.getIdLong()), embedBuilder.build());
+        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.CHAT_BISECT_STAFF.getIdLong() : Constants.CHAT_MELON_STAFF.getIdLong()), embedBuilder.build());
     }
 
     /**
