@@ -61,9 +61,9 @@ public class MessageHistory {
                     }
                 });
                 steve.modLog(member.getGuild(), steve.getEmbedBuilder(Steve.DiscordColor.KICK)
-                .setTitle("User kicked " + member.getUser().getName() + "#" + member.getUser().getDiscriminator() + " (" + member.getUser().getIdLong() + ")")
-                .addField("Reason", "Suspicious message activity.", false)
-                .addField("Details", "Spamming \"" + lastMessage + "\"", false));
+                        .setTitle("User kicked " + member.getUser().getName() + "#" + member.getUser().getDiscriminator() + " (" + member.getUser().getIdLong() + ")")
+                        .addField("Reason", "Suspicious message activity.", false)
+                        .addField("Details", "Spamming \"" + lastMessage + "\"", false));
 
                 message.getGuild().getController().kick(member, "Suspicious message activity. Spamming \"" + lastMessage + "\"").queue();
 
@@ -111,4 +111,3 @@ public class MessageHistory {
     }
 
 }
-

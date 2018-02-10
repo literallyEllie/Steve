@@ -130,12 +130,14 @@ public class MessageChecker extends ListenerAdapter {
             // if channel isn't an advert channel
         } else {
 
+            if (!content.matches(".*\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.)).*")) return true;
+
             matcher = REGEX_DOMAIN.matcher(content);
 
             while (matcher.find()) {
-                String domain = matcher.group().replace("www.", "").toLowerCase();
+                final String domain = matcher.group().toLowerCase().trim();
 
-                if (allowedDomains.contains(domain)) continue;
+                if (allowedDomains.contains(domain.replace("www.", ""))) continue;
 
                 // if they aren't in a advert room, be strict!
                 bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a non-authorised link, if you want to share links" +
