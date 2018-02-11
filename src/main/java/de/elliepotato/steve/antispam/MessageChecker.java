@@ -10,6 +10,7 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.core.utils.PermissionUtil;
 
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -56,6 +57,8 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         long channelId = event.getChannel().getIdLong();
         if (channelId == Constants.CHAT_BISECT_STAFF.getIdLong() || channelId == Constants.CHAT_MELON_STAFF.getIdLong())
             return;
+
+        if (!PermissionUtil.canInteract(event.getGuild().getMember(bot.getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), event.getMember())) return;
 
         if (!tagCheck(event.getMessage())) return;
         if (!advertCheck(event.getMessage())) return;
