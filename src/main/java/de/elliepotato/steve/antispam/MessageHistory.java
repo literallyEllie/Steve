@@ -1,27 +1,31 @@
 package de.elliepotato.steve.antispam;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.module.DataHolder;
+import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.exceptions.ErrorResponseException;
+import net.dv8tion.jda.core.utils.PermissionUtil;
+import net.jodah.expiringmap.ExpiringMap;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Ellie for VentureNode LLC
  * at 10/02/2018
  */
-public class MessageHistory {
+public class MessageHistory implements DataHolder {
 
     private final int MAX_MESSAGE_HISTORY_STORAGE = 30;
     private final int MAX_MESSAGE_REPEAT = 3;
 
     private Steve steve;
-    private Map<Long, LinkedList<Message>> messageHistory = Maps.newHashMap();
+    private Map<Long, LinkedList<Message>> messageHistory;
+
 
     /**
      * The spam checker, make sure people are spamming.
@@ -29,6 +33,15 @@ public class MessageHistory {
      */
     public MessageHistory(Steve steve) {
         this.steve = steve;
+        this.messageHistory = ExpiringMap.builder()
+                .expiration(10, TimeUnit.MINUTES)
+                .maxSize(MAX_MESSAGE_HISTORY_STORAGE)
+                .build();
+    }
+
+    @Override
+    public void shutdown() {
+        messageHistory.clear();
     }
 
     /**
@@ -38,6 +51,7 @@ public class MessageHistory {
      */
     public boolean call(Message message) {
         final Member member = message.getMember();
+        if (!PermissionUtil.canInteract(message.getGuild().getMember(steve.getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), member)) return true;
 
         final LinkedList<Message> messages = getMessageHistory(member);
         if (!messages.isEmpty() && messages.size() == MAX_MESSAGE_REPEAT) {
@@ -71,7 +85,6 @@ public class MessageHistory {
                 return false;
             }
 
-            return true;
         }
 
         logMessage(message);
@@ -90,17 +103,11 @@ public class MessageHistory {
             messages.removeLast();
         }
 
-        if (messageHistory.containsKey(member.getUser().getIdLong())) {
+        if (!messageHistory.containsKey(member.getUser().getIdLong())) {
             final LinkedList<Message> toAdd = Lists.newLinkedList();
             toAdd.add(message);
             messageHistory.put(member.getUser().getIdLong(), toAdd);
             return;
-        }
-
-        if (messageHistory.size() > MAX_MESSAGE_HISTORY_STORAGE) {
-            final Iterator<Map.Entry<Long, LinkedList<Message>>> iterator = messageHistory.entrySet().iterator();
-            iterator.next();
-            iterator.remove();
         }
 
         messages.add(message);

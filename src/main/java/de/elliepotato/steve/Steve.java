@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.1-RELEASE";
+    public static final String VERSION = "1.2-RELEASE";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger("Steve");
@@ -43,6 +43,8 @@ public class Steve {
     private CommandManager commandManager;
     private MySQLManager sqlManager;
     private CustomCommandManager customCommandManager;
+
+    private MessageChecker messageChecker;
 
     private SteveConsole steveConsole;
 
@@ -108,6 +110,7 @@ public class Steve {
 
         // Listener registration
         this.commandManager = new CommandManager(this);
+        this.messageChecker = new MessageChecker(this);
 
         // Setup JDA (blocking).
         try {
@@ -115,7 +118,7 @@ public class Steve {
                     .setToken(config.getBotToken())
                     .setGame(Game.of(Game.GameType.valueOf(config.getGameType().toUpperCase()), config.getGameOf())) // we already know its valid.
                     .setStatus(OnlineStatus.fromKey(config.getBotStatus().toLowerCase()))
-                    .addEventListener(new MessageChecker(this), commandManager)
+                    .addEventListener(messageChecker, commandManager)
                     .buildBlocking();
         } catch (LoginException | InterruptedException e) {
             LOGGER.error("Failed to setup JDA", e);
@@ -140,6 +143,9 @@ public class Steve {
      *                 Else, will be the first entry to the array.
      */
     public void shutdown(int... exitCode) {
+
+        if (messageChecker != null)
+            messageChecker.shutdown();
 
         if (commandManager != null)
             commandManager.shutdown();
@@ -213,6 +219,13 @@ public class Steve {
      */
     public MySQLManager getSqlManager() {
         return sqlManager;
+    }
+
+    /**
+     * @return The message checker.
+     */
+    public MessageChecker getMessageChecker() {
+        return messageChecker;
     }
 
     /**
@@ -330,6 +343,51 @@ public class Steve {
                 .setFooter("Just Steve-0 doing his job.", null);
     }
 
+    /**
+     * Attempt to parse from an input string to a {@link User}.
+     *  Will attempt to parse from: a raw ID, a mention or a User#Discrim
+     * @param input The input to parse from.
+     * @return the user or null if failed to parse
+     */
+    public User parseUser(String input) {
+
+        // raw id
+        long id;
+        try {
+            id = Long.parseLong(input);
+            return jda.getUserById(id);
+        } catch (NumberFormatException e) {
+        }
+
+        // a mention
+        if (PATTERN_USER.matcher(input).matches()) {
+            try {
+                id = Long.parseLong((input.replace("<", "")
+                        .replace(">", "").replace("@", "")
+                        .replace("!", ""))); // idk
+                return jda.getUserById(id);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        // accept user#discrim
+        if (input.contains("#")) {
+
+            final String[] parts = input.split("#");
+            final String name = parts[0];
+            final String discrim = parts[1]; // not parsing to int cus 0006 == 6
+
+            for (final User user : jda.getUsersByName(name, true)) {
+                if (user.getName().equalsIgnoreCase(name) && user.getDiscriminator().equals(discrim)) {
+                    return user;
+                }
+            }
+
+        }
+
+        return null;
+    }
 
     public enum DiscordColor {
 
