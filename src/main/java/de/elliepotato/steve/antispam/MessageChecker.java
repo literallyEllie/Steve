@@ -12,6 +12,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.utils.PermissionUtil;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +43,12 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         this.messageHistory = new MessageHistory(bot);
         this.domainsFile = new DomainsFile(bot);
         this.allowedDomains = Sets.newHashSet();
+        try {
+            this.allowedDomains = domainsFile.read();
+        } catch (IOException e) {
+            bot.getLogger().error("Failed to load domains!", e);
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -55,10 +62,12 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         if (event.getAuthor().isBot() || event.getAuthor().getIdLong() == Constants.PRESUMED_SELF.getIdLong()) return;
 
         long channelId = event.getChannel().getIdLong();
-        if (channelId == Constants.CHAT_BISECT_STAFF.getIdLong() || channelId == Constants.CHAT_MELON_STAFF.getIdLong())
+        if (channelId == Constants.CHAT_BISECT_MOD.getIdLong() || channelId == Constants.CHAT_MELON_MOD.getIdLong())
             return;
 
-        if (!PermissionUtil.canInteract(event.getGuild().getMember(bot.getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), event.getMember())) return;
+        if (!bot.getDebugger().getEnabled() &&
+                !PermissionUtil.canInteract(event.getGuild().getMember(bot.getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), event.getMember()))
+            return;
 
         if (!tagCheck(event.getMessage())) return;
         if (!advertCheck(event.getMessage())) return;
@@ -136,22 +145,31 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
                             " If you want your advert back, please check your PMs.", 10, null);
                     bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" + message.getContentRaw() + "```");
 
-                    message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines)", message.getTextChannel())));
+                    int finalLineBreaks = lineBreaks;
+                    message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines - " + finalLineBreaks
+                            + " > " + MAX_AD_LINE + ")", message.getTextChannel())));
                     return false;
                 }
 
             }
             // if channel isn't an advert channel
         } else {
+            bot.getDebugger().write("Strict advert check, (message = " + content + ")");
 
             if (!content.matches(".*\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.)).*")) return true;
 
             matcher = REGEX_DOMAIN.matcher(content);
 
+            linkFinder:
             while (matcher.find()) {
                 final String domain = matcher.group(5).toLowerCase().trim();
 
-                if (allowedDomains.contains(domain.replace("www.", ""))) continue;
+                for (String allowedDomain : allowedDomains) {
+                    if (domain.contains(allowedDomain.replace("www.", "")))
+                        continue linkFinder;
+                }
+
+//                if (allowedDomains.contains(domain.replace("www.", ""))) continue;
 
                 // if they aren't in a advert room, be strict!
                 bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a non-authorised link, if you want to share links" +

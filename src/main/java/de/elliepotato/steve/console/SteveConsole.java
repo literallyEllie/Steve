@@ -84,6 +84,8 @@ public class SteveConsole extends Thread {
                         steve.getLogger().info("ID " + steve.getJda().getSelfUser().getIdLong());
                         steve.getLogger().info("In " + steve.getJda().getGuilds().size() + " guilds");
                         steve.getLogger().info("With " + steve.getJda().getUsers().size() + " users");
+                    default:
+                        steve.getLogger().info("Unknown command.");
                 }
 
 
@@ -98,7 +100,7 @@ public class SteveConsole extends Thread {
     }
 
     private void cu(String x) {
-        System.out.println("Correct usage: ");
+        System.out.println("Correct usage: " + x);
     }
 
 }

@@ -7,6 +7,7 @@ import de.elliepotato.steve.config.JSONConfig;
 import de.elliepotato.steve.console.SteveConsole;
 import de.elliepotato.steve.mysql.MySQLManager;
 import de.elliepotato.steve.util.Constants;
+import de.elliepotato.steve.util.DebugWriter;
 import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.ErrorResponseException;
@@ -32,6 +33,7 @@ public class Steve {
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger("Steve");
+    private final DebugWriter DEBUG = new DebugWriter(this);
 
     private final Pattern PATTERN_USER = Pattern.compile("<@!?([0-9]+)>");
 
@@ -177,6 +179,13 @@ public class Steve {
      */
     public Logger getLogger() {
         return LOGGER;
+    }
+
+    /**
+     * @return The debugger out-putter.
+     */
+    public DebugWriter getDebugger() {
+        return DEBUG;
     }
 
     /**
@@ -326,7 +335,7 @@ public class Steve {
      * @param embedBuilder The embed to log
      */
     public void modLog(Guild guild, EmbedBuilder embedBuilder) {
-        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.CHAT_BISECT_STAFF.getIdLong() : Constants.CHAT_MELON_STAFF.getIdLong()), embedBuilder.build());
+        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.CHAT_BISECT_MOD.getIdLong() : Constants.CHAT_MELON_MOD.getIdLong()), embedBuilder.build());
     }
 
     /**
