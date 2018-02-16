@@ -49,8 +49,9 @@ dependencies {
 
 
     // Util
-    compile group: 'com.google.guava', name: 'guava', version: 'r05'
-    compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
+    compile group: 'com.google.guava', name: 'guava', version: 'r05' // google utils
+    compile group: 'org.reflections', name: 'reflections', version: '0.9.10' // commnand registerer
+    compile 'net.jodah:expiringmap:0.5.8' // expiring hashmaps lol
 
 
     // JSON

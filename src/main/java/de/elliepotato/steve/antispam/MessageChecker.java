@@ -2,6 +2,7 @@ package de.elliepotato.steve.antispam;
 
 import com.google.common.collect.Sets;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Message;
@@ -9,7 +10,9 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.core.utils.PermissionUtil;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,26 +21,40 @@ import java.util.regex.Pattern;
  * @author Ellie for VentureNode LLC
  * at 04/02/2018
  */
-public class MessageChecker extends ListenerAdapter {
+public class MessageChecker extends ListenerAdapter implements DataHolder {
 
     private final int MAX_MESSAGE_TAG = 8;
     private final int MAX_AD_LINE = 7; // line breaks
-    private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?([a-z0-9]+(-[a-z0-9]+)*\\.))+[a-z]{2,63}\\b");
+    private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.))([^:/\\?\\=]+)\\b");
     private Steve bot;
-    private Set<String> allowedDomains = Sets.newHashSet("hastebin.com", "pastebin.com", "google.com", "google.co.uk", "google.no",
-            "meloncube.net", "bisecthosting.com", "discord.gg", "discordapp.com", "dis.gd", "discord.co", "discord.com", "spigotmc.org",
-            "bukkit.org", "minecraft.net", "mojang.com", "minecraftforge.net", "wikipedia.org", "stackoverflow.com", "prnt.sc", "imgur.com",
-            "strawpoll.me", "strawpoll.com", "github.com", "mc-market.org", "ess3.net", "filezilla-project.org", "youtube.com", "mc-ess.net");
+
+    private DomainsFile domainsFile;
+    private Set<String> allowedDomains;
 
     private MessageHistory messageHistory;
 
     /**
      * The big bad chat moderating module.
+     *
      * @param bot The bot instance.
      */
     public MessageChecker(Steve bot) {
         this.bot = bot;
         this.messageHistory = new MessageHistory(bot);
+        this.domainsFile = new DomainsFile(bot);
+        this.allowedDomains = Sets.newHashSet();
+        try {
+            this.allowedDomains = domainsFile.read();
+        } catch (IOException e) {
+            bot.getLogger().error("Failed to load domains!", e);
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        if (messageHistory != null)
+            messageHistory.shutdown();
     }
 
     @Override
@@ -45,7 +62,11 @@ public class MessageChecker extends ListenerAdapter {
         if (event.getAuthor().isBot() || event.getAuthor().getIdLong() == Constants.PRESUMED_SELF.getIdLong()) return;
 
         long channelId = event.getChannel().getIdLong();
-        if (channelId == Constants.CHAT_BISECT_STAFF.getIdLong() || channelId == Constants.CHAT_MELON_STAFF.getIdLong())
+        if (channelId == Constants.CHAT_BISECT_MOD.getIdLong() || channelId == Constants.CHAT_MELON_MOD.getIdLong())
+            return;
+
+        if (!bot.getDebugger().getEnabled() &&
+                !PermissionUtil.canInteract(event.getGuild().getMember(bot.getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), event.getMember()))
             return;
 
         if (!tagCheck(event.getMessage())) return;
@@ -57,6 +78,7 @@ public class MessageChecker extends ListenerAdapter {
 
     /**
      * Check the message for any tag spamming
+     *
      * @param message The message to check
      * @return "true" if they are safe, "false" if they got rekt.
      */
@@ -100,6 +122,7 @@ public class MessageChecker extends ListenerAdapter {
 
     /**
      * Check if the message contains a bad advertisement and also check the message length of a potential advertisement.
+     *
      * @param message Message to check.
      * @return "true" if they are safe, "false" if they got rekt.
      */
@@ -122,27 +145,37 @@ public class MessageChecker extends ListenerAdapter {
                             " If you want your advert back, please check your PMs.", 10, null);
                     bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" + message.getContentRaw() + "```");
 
-                    message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines)", message.getTextChannel())));
+                    int finalLineBreaks = lineBreaks;
+                    message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines - " + finalLineBreaks
+                            + " > " + MAX_AD_LINE + ")", message.getTextChannel())));
                     return false;
                 }
 
             }
             // if channel isn't an advert channel
         } else {
+            bot.getDebugger().write("Strict advert check, (message = " + content + ")");
 
             if (!content.matches(".*\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.)).*")) return true;
 
             matcher = REGEX_DOMAIN.matcher(content);
 
+            linkFinder:
             while (matcher.find()) {
-                final String domain = matcher.group().toLowerCase().trim();
+                final String domain = matcher.group(5).toLowerCase().trim();
 
-                if (allowedDomains.contains(domain.replace("www.", ""))) continue;
+                for (String allowedDomain : allowedDomains) {
+                    if (domain.contains(allowedDomain.replace("www.", "")))
+                        continue linkFinder;
+                }
+
+//                if (allowedDomains.contains(domain.replace("www.", ""))) continue;
 
                 // if they aren't in a advert room, be strict!
                 bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a non-authorised link, if you want to share links" +
                         " please say it in PMs. If you want your message back, please ask staff.", 10, null);
-                message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advertising (unauthorised link) in #" + message.getChannel().getName(), message.getTextChannel())));
+                message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advertising (unauthorised link) in #" + message.getChannel().getName(), message.getTextChannel())
+                        .addField("Match domain:", domain, true)));
                 return false;
             }
 
@@ -152,10 +185,11 @@ public class MessageChecker extends ListenerAdapter {
     }
 
     /**
-     * Quick embed builder getter
-     * @param message Message deleted
-     * @param reason Reason message was deleted
-     * @param channel Channel message was deleted from
+     * Quick embed builder getter.
+     *
+     * @param message Message deleted.
+     * @param reason  Reason message was deleted.
+     * @param channel Channel message was deleted from.
      * @return The embed builder template, with the title and reason filled in.
      */
     private EmbedBuilder embedMessageDelete(Message message, String reason, TextChannel channel) {
@@ -164,6 +198,20 @@ public class MessageChecker extends ListenerAdapter {
                 .setTitle("Deleted message from " + author.getName() + "#" + author.getDiscriminator() + " (" + author.getIdLong() + ")" +
                         " in channel #" + channel.getName()).addField("Message content:", message.getContentRaw(), false)
                 .addField("Reason:", reason, false);
+    }
+
+    /**
+     * @return The allowed domains.
+     */
+    public Set<String> getAllowedDomains() {
+        return allowedDomains;
+    }
+
+    /**
+     * @return The domains file writer.
+     */
+    public DomainsFile getDomainsFile() {
+        return domainsFile;
     }
 
 }
