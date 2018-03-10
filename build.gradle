@@ -38,21 +38,19 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     // JDA
-    compile 'net.dv8tion:JDA:3.5.0_334'
+    compile 'net.dv8tion:JDA:3.5.1_339'
 
     // Logging
     compile "ch.qos.logback:logback-classic:1.2.3"
 
-    // Backened
+    // Backend
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
     compile group: 'com.zaxxer', name: 'HikariCP', version: '2.7.6'
 
-
     // Util
     compile group: 'com.google.guava', name: 'guava', version: 'r05' // google utils
-    compile group: 'org.reflections', name: 'reflections', version: '0.9.10' // commnand registerer
+    compile group: 'org.reflections', name: 'reflections', version: '0.9.10' // command registerer
     compile 'net.jodah:expiringmap:0.5.8' // expiring hashmaps lol
-
 
     // JSON
     compile "com.github.Arraying:Kotys:0.3.3"

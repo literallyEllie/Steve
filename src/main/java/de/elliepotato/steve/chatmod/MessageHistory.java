@@ -1,4 +1,4 @@
-package de.elliepotato.steve.antispam;
+package de.elliepotato.steve.chatmod;
 
 import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;

@@ -1,7 +1,8 @@
-package de.elliepotato.steve.antispam;
+package de.elliepotato.steve.chatmod;
 
 import com.google.common.collect.Sets;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.chatmod.help.DumbResponder;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -32,6 +33,7 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
     private Set<String> allowedDomains;
 
     private MessageHistory messageHistory;
+    private DumbResponder dumbResponder;
 
     /**
      * The big bad chat moderating module.
@@ -49,6 +51,7 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
             bot.getLogger().error("Failed to load domains!", e);
             e.printStackTrace();
         }
+        this.dumbResponder = new DumbResponder(bot);
     }
 
     @Override
@@ -72,6 +75,8 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         if (!tagCheck(event.getMessage())) return;
         if (!advertCheck(event.getMessage())) return;
         if (!messageHistory.call(event.getMessage())) return;
+
+        dumbResponder.onMessage(event.getMessage());
 
         // ...
     }
@@ -214,4 +219,10 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         return domainsFile;
     }
 
+    /**
+     * @return the thing that listens to messages and tries to help them.
+     */
+    public DumbResponder getDumbResponder() {
+        return dumbResponder;
+    }
 }

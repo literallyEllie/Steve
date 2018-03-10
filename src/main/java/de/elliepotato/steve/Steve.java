@@ -1,6 +1,6 @@
 package de.elliepotato.steve;
 
-import de.elliepotato.steve.antispam.MessageChecker;
+import de.elliepotato.steve.chatmod.MessageChecker;
 import de.elliepotato.steve.cmd.CommandManager;
 import de.elliepotato.steve.cmd.CustomCommandManager;
 import de.elliepotato.steve.config.JSONConfig;
@@ -11,7 +11,6 @@ import de.elliepotato.steve.util.DebugWriter;
 import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.ErrorResponseException;
-import net.dv8tion.jda.core.utils.PermissionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.2-RELEASE";
+    public static final String VERSION = "1.3-RELEASE";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger("Steve");
