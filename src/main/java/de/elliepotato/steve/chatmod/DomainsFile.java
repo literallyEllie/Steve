@@ -8,11 +8,10 @@ import java.io.*;
 import java.util.Set;
 
 /**
- * @author Ellie in Discord
+ * @author Ellie for VentureNode LLC
  * at 11/02/2018
  */
 public class DomainsFile extends FileHandler<Set<String>> {
-
 
     public DomainsFile(Steve steve) {
         super(steve, new File("domains.txt"));
