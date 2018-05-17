@@ -184,7 +184,6 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
 
                 }
             } else {
-                System.out.println(blacklistedDomains);
                 bot.getDebugger().write("Unstrict check ");
                 // If it is in an advert channel, check if the link is blacklisted or not.
                 boolean hit = false;
@@ -257,11 +256,11 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         return blacklistedDomains;
     }
 
-
     /**
      * @return the thing that listens to messages and tries to help them.
      */
     public DumbResponder getDumbResponder() {
         return dumbResponder;
     }
+
 }
