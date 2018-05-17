@@ -26,9 +26,9 @@ public class MessageHistory implements DataHolder {
     private Steve steve;
     private Map<Long, LinkedList<Message>> messageHistory;
 
-
     /**
      * The spam checker, make sure people are spamming.
+     *
      * @param steve Bot instance.
      */
     public MessageHistory(Steve steve) {
@@ -46,12 +46,15 @@ public class MessageHistory implements DataHolder {
 
     /**
      * Event call when a message should be checked
+     *
      * @param message The message to check
      * @return "true" if they are safe, "false" if they got rekt.
      */
     public boolean call(Message message) {
         final Member member = message.getMember();
-        if (!PermissionUtil.canInteract(message.getGuild().getMember(steve.getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), member)) return true;
+        if (!PermissionUtil.canInteract(message.getGuild().getMember(steve.getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), member))
+            return true;
+        if (!message.getAttachments().isEmpty()) return false;
 
         final LinkedList<Message> messages = getMessageHistory(member);
         if (!messages.isEmpty() && messages.size() == MAX_MESSAGE_REPEAT) {
@@ -93,6 +96,7 @@ public class MessageHistory implements DataHolder {
 
     /**
      * Log a message and remove old ones.
+     *
      * @param message The message to log.
      */
     private void logMessage(Message message) {

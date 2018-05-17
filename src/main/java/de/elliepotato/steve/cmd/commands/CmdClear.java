@@ -15,6 +15,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public class CmdClear extends Command {
 
+    /**
+     * A command to quickly clear x amount of messages. Useful for spam.
+     *
+     * @param steve Bot instance.
+     */
     public CmdClear(Steve steve) {
         super(steve, "clear", "Clear messages", Lists.newArrayList(), Permission.MESSAGE_MANAGE,
                 Lists.newArrayList("<amount>"));

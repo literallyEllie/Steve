@@ -18,11 +18,11 @@ public abstract class FileHandler<T> {
      * A class representing the handler of a file.
      * Holding all the abstract methods that are good for the
      * handling of the files.
-     *
+     * <p>
      * The constructor also creates the file, and handles the error should it occur.
      *
      * @param steve The bot instance.
-     * @param file The file the class instance will read/write from.
+     * @param file  The file the class instance will read/write from.
      */
     public FileHandler(Steve steve, File file) {
         this.steve = steve;
@@ -42,12 +42,14 @@ public abstract class FileHandler<T> {
 
     /**
      * Write the preset file defaults.
+     *
      * @throws IOException if there is an error with writing to file.
      */
     public abstract void writeDefaults() throws IOException;
 
     /**
      * Should read the file and return the file contents in the form of T
+     *
      * @return The file contents.
      * @throws IOException if there is an error reading from the file.
      */
@@ -55,6 +57,7 @@ public abstract class FileHandler<T> {
 
     /**
      * Should write to the file.
+     *
      * @param type The contents to writ.e
      * @throws IOException If there is an error writing to the file.
      */

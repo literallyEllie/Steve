@@ -13,6 +13,13 @@ import org.jetbrains.annotations.NotNull;
  */
 public class CmdShutdown extends Command {
 
+    /**
+     * Command to shut down the bot, this only requires a permission as it is meant to be accessible
+     * by server admins if a problem persists.
+     * Also used to develop without having to shutdown from terminal.
+     *
+     * @param steve The bot instance.
+     */
     public CmdShutdown(Steve steve) {
         super(steve, "shutdown", "Shutdown the bot", Lists.newArrayList(), Permission.KICK_MEMBERS,
                 Lists.newArrayList());

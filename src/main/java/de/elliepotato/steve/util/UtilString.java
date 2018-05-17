@@ -6,6 +6,13 @@ package de.elliepotato.steve.util;
  */
 public class UtilString {
 
+    /**
+     * A util method to get the final arguements of a string array input.
+     *
+     * @param args  the arguments to split from.
+     * @param start the start index in the array.
+     * @return the extracted and built string.
+     */
     public static String getFinalArg(final String[] args, final int start) {
         StringBuilder sb = new StringBuilder();
         for (int i = start; i < args.length; i++) {

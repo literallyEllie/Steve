@@ -22,6 +22,11 @@ public class CustomCommandManager implements DataHolder {
     private Map<Long, Map<String, CustomCommand>> customCommands;
     private Map<Long, Map<String, CustomCommand>> newCustomCommands;
 
+    /**
+     * The internal manager to handle guild custom commands created within the bot.
+     *
+     * @param steve the bot instance.
+     */
     public CustomCommandManager(Steve steve) {
         this.steve = steve;
         this.customCommands = Maps.newHashMap();

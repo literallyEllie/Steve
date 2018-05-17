@@ -13,6 +13,11 @@ import java.util.Set;
  */
 public class DomainsFile extends FileHandler<Set<String>> {
 
+    /**
+     * A handle for domains that are whitelisted throughout the help and general channels.
+     *
+     * @param steve the bot instance.
+     */
     public DomainsFile(Steve steve) {
         super(steve, new File("domains.txt"));
     }

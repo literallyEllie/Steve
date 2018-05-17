@@ -3,6 +3,7 @@ package de.elliepotato.steve.chatmod;
 import com.google.common.collect.Sets;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.chatmod.help.DumbResponder;
+import de.elliepotato.steve.config.FileHandler;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -25,12 +26,12 @@ import java.util.regex.Pattern;
 public class MessageChecker extends ListenerAdapter implements DataHolder {
 
     private final int MAX_MESSAGE_TAG = 8;
-    private final int MAX_AD_LINE = 7; // line breaks
+    private final int MAX_AD_LINE = 8; // line breaks
     private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.))([^:/\\?\\=]+)\\b");
     private Steve bot;
 
-    private DomainsFile domainsFile;
-    private Set<String> allowedDomains;
+    private FileHandler<Set<String>> domainsFile, blacklistedFile;
+    private Set<String> allowedDomains, blacklistedDomains;
 
     private MessageHistory messageHistory;
     private DumbResponder dumbResponder;
@@ -45,8 +46,11 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         this.messageHistory = new MessageHistory(bot);
         this.domainsFile = new DomainsFile(bot);
         this.allowedDomains = Sets.newHashSet();
+        this.blacklistedFile = new BlacklistedDomainsFile(bot);
+        this.blacklistedDomains = Sets.newHashSet();
         try {
             this.allowedDomains = domainsFile.read();
+            this.blacklistedDomains = blacklistedFile.read();
         } catch (IOException e) {
             bot.getLogger().error("Failed to load domains!", e);
             e.printStackTrace();
@@ -133,13 +137,13 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
      */
     public boolean advertCheck(Message message) {
         String content = message.getContentRaw();
-        // if channel isnt advertise channel
+        // if channel isn't advertise channel
         final boolean strict = message.getChannel().getIdLong() != Constants.CHAT_BISECT_AD.getIdLong() &&
                 message.getChannel().getIdLong() != Constants.CHAT_MELON_AD.getIdLong();
 
         Matcher matcher = Pattern.compile("\n").matcher(content);
 
-        // stop unnessary check, "if channel is an advert channel"
+        // stop unnecessary check, "if channel is an advert channel"
         if (!strict) {
             int lineBreaks = 0;
             while (matcher.find()) {
@@ -157,33 +161,53 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
                 }
 
             }
-            // if channel isn't an advert channel
-        } else {
-            bot.getDebugger().write("Strict advert check, (message = " + content + ")");
 
-            if (!content.matches(".*\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.)).*")) return true;
+        }
+        bot.getDebugger().write("Strict advert check, (message = " + content + ")");
 
-            matcher = REGEX_DOMAIN.matcher(content);
+        // Contains a URL?
+        if (!content.matches(".*\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.)).*")) return true;
 
-            linkFinder:
-            while (matcher.find()) {
-                final String domain = matcher.group(5).toLowerCase().trim();
+        matcher = REGEX_DOMAIN.matcher(content);
 
+        linkFinder:
+        while (matcher.find()) {
+            final String domain = matcher.group(5).toLowerCase().trim();
+
+            if (strict) {
+                // For every allowed domain
                 for (String allowedDomain : allowedDomains) {
+                    // Does the checking domain contain the allowed domain?
                     if (domain.contains(allowedDomain.replace("www.", "")))
+                        // Ignore and carry on
                         continue linkFinder;
+
+                }
+            } else {
+                System.out.println(blacklistedDomains);
+                bot.getDebugger().write("Unstrict check ");
+                // If it is in an advert channel, check if the link is blacklisted or not.
+                boolean hit = false;
+                // For every denied domain
+                for (String deniedLink : blacklistedDomains) {
+                    if (domain.contains(deniedLink.replace("www.", ""))) {
+                        hit = true;
+                        break;
+                    }
                 }
 
-//                if (allowedDomains.contains(domain.replace("www.", ""))) continue;
+                bot.getDebugger().write("deleting ? " + hit);
+                if (!hit) return true;
 
-                // if they aren't in a advert room, be strict!
-                bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a non-authorised link, if you want to share links" +
-                        " please say it in PMs. If you want your message back, please ask staff.", 10, null);
-                message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advertising (unauthorised link) in #" + message.getChannel().getName(), message.getTextChannel())
-                        .addField("Match domain:", domain, true)));
-                return false;
             }
 
+            // Tailor message
+            bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a " + (strict ? "blacklisted link." :
+                    "non-authorised link, if you want to share links" +
+                            " please say it in PMs.") + " If you want your message back, please ask staff.", 10, null);
+            message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advertising (" + (strict ? "unauthorised" : "blacklisted") +
+                    " link) in #" + message.getChannel().getName(), message.getTextChannel()).addField("Match domain:", domain, true)));
+            return false;
         }
 
         return true;
@@ -213,11 +237,26 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
     }
 
     /**
-     * @return The domains file writer.
+     * @return The domains file handler.
      */
-    public DomainsFile getDomainsFile() {
+    public FileHandler<Set<String>> getDomainsFile() {
         return domainsFile;
     }
+
+    /**
+     * @return the blacklisted domains handler.
+     */
+    public FileHandler<Set<String>> getBlacklistedFile() {
+        return blacklistedFile;
+    }
+
+    /**
+     * @return The preloaded blacklisted domains.
+     */
+    public Set<String> getBlacklistedDomains() {
+        return blacklistedDomains;
+    }
+
 
     /**
      * @return the thing that listens to messages and tries to help them.

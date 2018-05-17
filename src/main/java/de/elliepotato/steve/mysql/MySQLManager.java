@@ -17,6 +17,11 @@ public class MySQLManager implements DataHolder {
 
     private HikariDataSource dataSource;
 
+    /**
+     * Internal manager for getting connections from a SQL pool somewhere.
+     *
+     * @param steve the bot instance.
+     */
     public MySQLManager(Steve steve) {
         final JSONConfig config = steve.getConfig();
 

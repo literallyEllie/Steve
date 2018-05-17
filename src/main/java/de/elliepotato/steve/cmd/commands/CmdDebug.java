@@ -13,6 +13,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public class CmdDebug extends Command {
 
+    /**
+     * A developer command which is toggle and outputs to the channel it was toggled in.
+     *
+     * @param steve the bot instance.
+     */
     public CmdDebug(Steve steve) {
         super(steve, "debug", "Steve's debug system", Lists.newArrayList(), Permission.MESSAGE_MANAGE, Lists.newArrayList());
     }

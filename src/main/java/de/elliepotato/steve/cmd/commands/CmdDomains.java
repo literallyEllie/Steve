@@ -17,9 +17,17 @@ import java.io.IOException;
  */
 public class CmdDomains extends Command {
 
+    /**
+     * Command for domain filter management.
+     * This allows for whitelisting and blacklisting domains.
+     * <p>
+     * The blacklisting of domains is primarily for use in the server-advertisements as the rest runs on a whitelist.
+     *
+     * @param steve The bot instance
+     */
     public CmdDomains(Steve steve) {
         super(steve, "domains", "Domain whitelist management", Lists.newArrayList(), Permission.MESSAGE_MANAGE,
-                Lists.newArrayList("<add> <domain.com>"));
+                Lists.newArrayList("<whitelist | blacklist> <domain.com>"));
     }
 
     @Override
@@ -28,7 +36,7 @@ public class CmdDomains extends Command {
         final String[] args = environment.getArgs();
 
         switch (args[0].toLowerCase()) {
-            case "add":
+            case "whitelist":
                 MessageChecker messageChecker = getBot().getMessageChecker();
 
                 String stripped = args[1].toLowerCase().replaceAll("http?s/{2}", "").replace("/", "").trim();
@@ -44,6 +52,24 @@ public class CmdDomains extends Command {
                     getBot().tempMessage(channel, "Whitelisted the domain `" + stripped + "`.", 7, environment.getMessage());
                 } catch (IOException e) {
                     getBot().messageChannel(channel, ":x: Failed to write domains to file!");
+                    e.printStackTrace();
+                }
+                break;
+            case "blacklist":
+                messageChecker = getBot().getMessageChecker();
+                stripped = args[1].toLowerCase().replaceAll("http?s/{2}", "").replace("/", "").trim();
+
+                if (messageChecker.getBlacklistedDomains().contains(stripped)) {
+                    getBot().tempMessage(channel, "This domain is already blacklisted.", 7, null);
+                    return;
+                }
+
+                messageChecker.getBlacklistedDomains().add(stripped);
+                try {
+                    messageChecker.getBlacklistedFile().write(getBot().getMessageChecker().getBlacklistedDomains());
+                    getBot().tempMessage(channel, "Blacklisted the domain `" + stripped + "`.", 7, environment.getMessage());
+                } catch (IOException e) {
+                    getBot().messageChannel(channel, ":x: Failed to write domains to blacklisted file!");
                     e.printStackTrace();
                 }
                 break;

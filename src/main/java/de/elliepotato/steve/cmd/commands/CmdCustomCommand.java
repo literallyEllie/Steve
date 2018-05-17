@@ -21,6 +21,12 @@ import java.util.Map;
  */
 public class CmdCustomCommand extends Command {
 
+    /**
+     * A command to easily manage custom commands which are can be utilized by everyone throughout the servers
+     * for easy use.
+     *
+     * @param steve the bot instance
+     */
     public CmdCustomCommand(Steve steve) {
         super(steve, "customcommands", "Custom command manager", Lists.newArrayList("cc"),
                 Permission.KICK_MEMBERS, Lists.newArrayList("<create | delete | set | list>"));

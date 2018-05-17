@@ -17,6 +17,13 @@ public class SteveConsole extends Thread {
 
     private Steve steve;
 
+    /**
+     * The console thread which is only accessable from the backend.
+     * Small operations can be done such as shutting down, changing the bot status and
+     * looking at global status.
+     *
+     * @param steve the bot instance.
+     */
     public SteveConsole(Steve steve) {
         this.steve = steve;
     }

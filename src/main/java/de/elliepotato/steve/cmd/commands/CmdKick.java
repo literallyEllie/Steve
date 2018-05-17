@@ -19,6 +19,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public class CmdKick extends Command {
 
+    /**
+     * A command to quickly kick a user from the server.
+     *
+     * @param steve the bot instance.
+     */
     public CmdKick(Steve steve) {
         super(steve, "kick", "Kick a user off the face of the Earth", Lists.newArrayList(), Permission.KICK_MEMBERS,
                 Lists.newArrayList("<target> [reason]"));

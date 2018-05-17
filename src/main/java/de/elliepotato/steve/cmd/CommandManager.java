@@ -36,10 +36,10 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
     /**
      * Manager to handle commands and borrowed methods from other Discord projects.
      *
-     * @param ventureBot The bot instance.
+     * @param steve The bot instance.
      */
-    public CommandManager(Steve ventureBot) {
-        this.bot = ventureBot;
+    public CommandManager(Steve steve) {
+        this.bot = steve;
         this.commandMap = Maps.newHashMap();
         this.stopMessagingMeMemory = Sets.newHashSet();
 

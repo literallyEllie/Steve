@@ -19,6 +19,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public class CmdBan extends Command {
 
+    /**
+     * Quick perm ban command.
+     *
+     * @param steve Bot instance.
+     */
     public CmdBan(Steve steve) {
         super(steve, "ban", "Ban a user (forever)", Lists.newArrayList(), Permission.KICK_MEMBERS,
                 Lists.newArrayList("<target> [reason]"));
