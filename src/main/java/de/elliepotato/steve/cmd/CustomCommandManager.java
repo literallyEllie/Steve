@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Ellie for VentureNode LLC
@@ -20,7 +21,6 @@ public class CustomCommandManager implements DataHolder {
     private final static String TABLE = "steve_custom_commands";
     private Steve steve;
     private Map<Long, Map<String, CustomCommand>> customCommands;
-    private Map<Long, Map<String, CustomCommand>> newCustomCommands;
 
     /**
      * The internal manager to handle guild custom commands created within the bot.
@@ -30,7 +30,6 @@ public class CustomCommandManager implements DataHolder {
     public CustomCommandManager(Steve steve) {
         this.steve = steve;
         this.customCommands = Maps.newHashMap();
-        this.newCustomCommands = Maps.newHashMap();
 
         try (Connection connection = steve.getSqlManager().getConnection()) {
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS `" + TABLE + "` (" +
@@ -40,7 +39,6 @@ public class CustomCommandManager implements DataHolder {
                     "`description` TEXT NULL, " +
                     "`response` TEXT NULL, " +
                     "INDEX(guild)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1").execute();
-
 
             final ResultSet resultSet = connection.prepareStatement("SELECT * FROM `" + TABLE + "`").executeQuery();
             while (resultSet.next()) {
@@ -62,35 +60,6 @@ public class CustomCommandManager implements DataHolder {
 
     @Override
     public void shutdown() {
-
-        if (!newCustomCommands.isEmpty()) {
-            try (Connection connection = steve.getSqlManager().getConnection()) {
-
-                newCustomCommands.forEach((guildId, customCommandMap) -> customCommandMap.values().forEach(customCommand -> {
-                    try {
-                        PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `" + TABLE + "` (guild, label, description, response) VALUES "
-                                + "(?, ?, ?, ?)");
-                        preparedStatement.setLong(1, guildId);
-                        preparedStatement.setString(2, customCommand.getLabel().toLowerCase());
-                        preparedStatement.setString(3, customCommand.getDescription());
-                        preparedStatement.setString(4, customCommand.getResponseMessage());
-                        preparedStatement.execute();
-                        preparedStatement.close();
-                    } catch (SQLException e) {
-                        steve.getLogger().error("Failed to push custom command " + customCommand.getLabel() + "!");
-                        e.printStackTrace();
-                    }
-
-                }));
-
-            } catch (SQLException e) {
-                steve.getLogger().error("Failed to push new custom commands!");
-                e.printStackTrace();
-            }
-
-        }
-
-        newCustomCommands.clear();
         customCommands.clear();
     }
 
@@ -118,17 +87,6 @@ public class CustomCommandManager implements DataHolder {
      */
     public void addCustomCommand(long guildId, CustomCommand customCommand, boolean newCommand) {
 
-        // idk
-        if (newCommand) {
-            if (!newCustomCommands.containsKey(guildId)) {
-                Map<String, CustomCommand> customCommandMap = Maps.newHashMap();
-                customCommandMap.put(customCommand.getLabel().toLowerCase(), customCommand);
-                newCustomCommands.put(guildId, customCommandMap);
-            } else if (newCustomCommands.get(guildId).containsKey(customCommand.getLabel().toLowerCase())) {
-                newCustomCommands.get(guildId).replace(customCommand.getLabel().toLowerCase(), customCommand);
-            } else newCustomCommands.get(guildId).put(customCommand.getLabel().toLowerCase(), customCommand);
-        }
-
         if (!customCommands.containsKey(guildId)) {
             Map<String, CustomCommand> customCommandMap = Maps.newHashMap();
             customCommandMap.put(customCommand.getLabel().toLowerCase(), customCommand);
@@ -143,6 +101,27 @@ public class CustomCommandManager implements DataHolder {
         }
 
         customCommandMap.put(customCommand.getLabel().toLowerCase(), customCommand);
+
+        if (newCommand) {
+
+            new Thread(() -> {
+                try (Connection connection = steve.getSqlManager().getConnection()) {
+                    PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `" + TABLE + "` (guild, label, description, response) VALUES "
+                            + "(?, ?, ?, ?)");
+                    preparedStatement.setLong(1, guildId);
+                    preparedStatement.setString(2, customCommand.getLabel().toLowerCase());
+                    preparedStatement.setString(3, customCommand.getDescription());
+                    preparedStatement.setString(4, customCommand.getResponseMessage());
+                    preparedStatement.execute();
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    steve.getLogger().error("Failed to push custom command " + customCommand.getLabel() + "!");
+                    e.printStackTrace();
+                }
+            }).run();
+
+        }
+
     }
 
     /**
@@ -152,16 +131,11 @@ public class CustomCommandManager implements DataHolder {
      * @param label   The label of the custom command to delete.
      */
     public void deleteCustomCommand(long guildId, String label) {
-        if (newCustomCommands.containsKey(guildId) && newCustomCommands.get(guildId).containsKey(label.toLowerCase())) {
-            newCustomCommands.get(guildId).remove(label.toLowerCase());
-        }
-
         if (!customCommands.containsKey(guildId)) return;
 
         final CustomCommand customCommand = customCommands.get(guildId).get(label.toLowerCase());
         if (customCommand == null)
             return;
-
 
         try (Connection connection = steve.getSqlManager().getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM `" + TABLE + "` WHERE label = ?");

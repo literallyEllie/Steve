@@ -74,7 +74,7 @@ public class CmdDomains extends Command {
                 }
                 break;
             default:
-                correctUsage("");
+                getBot().messageChannel(environment.getChannel(), correctUsage(""));
         }
 
     }

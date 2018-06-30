@@ -47,20 +47,19 @@ public class DumbResponder {
             return;
         }
 
-        if (msg.contains("sale") || msg.contains("promo codes") || msg.contains("promotion") ||
-                msg.contains("promotional") || msg.contains("coupon")) {
+        if (msg.matches("(are )?there any( current)? promo(tional)? codes( currently)?\\??")
+                || msg.matches("(is|are)( there )?a(ny)? (sales|promo(tional)? codes?)?( currently)?\\??")) {
 
             List<String> codes = ((CmdPromo) steve.getCommandManager().getCommand("promo", false)).getCodesOf(guild);
-            steve.messageChannel(message.getChannel().getIdLong(), codes.isEmpty() ? "Sorry there are currently no current promotional codes!" :
+            steve.messageChannel(message.getChannel().getIdLong(), codes.isEmpty() ? "Sorry there are currently no promotional codes!" :
                     "Current codes: " + Joiner.on(", ").join(codes));
-
             return;
         }
 
         if (msg.matches("((can someone|i need) )?help( me)?( please)?\\??")) {
 
             String newMsg = "Hi there, " + member.getAsMention() + ". If you are looking for help please specify the problems you're experiencing " +
-                    "as well as any problems in console (if necessary). A real person will get to you soon!";
+                    "(if you haven't already) as well as posting any problems in console via http://hastebin.com/ (if necessary). A real person will get to you soon!";
 
             if (message.getChannel().getIdLong() == Constants.CHAT_BISECT_GENERAL.getIdLong() || message.getChannel().getIdLong() ==
                     Constants.CHAT_MELON_GENERAL.getIdLong()) {

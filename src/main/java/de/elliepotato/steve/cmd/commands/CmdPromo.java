@@ -38,8 +38,8 @@ public class CmdPromo extends Command {
 
         final String[] args = environment.getArgs();
 
-        if (args.length > 1) {
-            correctUsage("");
+        if (args.length < 1) {
+            getBot().messageChannel(environment.getChannel(), correctUsage(""));
             if (codes.containsKey(idLong)) {
                 getBot().messageChannel(environment.getChannel(), "Current promo codes:\n" + Joiner.on("\n").join(codes.get(idLong)));
             }
