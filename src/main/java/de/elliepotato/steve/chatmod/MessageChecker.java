@@ -151,7 +151,7 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
                 if (lineBreaks > MAX_AD_LINE) {
 
                     bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "Your advert is too long, please reconsider the size to make it smaller." +
-                            " If you want your advert back, please check your PMs.", 10, null);
+                            " (Must fit in " + MAX_AD_LINE + " lines). If you want your advert back, please check your PMs.", 15, null);
                     bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" + message.getContentRaw() + "```");
 
                     int finalLineBreaks = lineBreaks;
@@ -184,7 +184,6 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
 
                 }
             } else {
-                System.out.println(blacklistedDomains);
                 bot.getDebugger().write("Unstrict check ");
                 // If it is in an advert channel, check if the link is blacklisted or not.
                 boolean hit = false;
@@ -257,11 +256,11 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         return blacklistedDomains;
     }
 
-
     /**
      * @return the thing that listens to messages and tries to help them.
      */
     public DumbResponder getDumbResponder() {
         return dumbResponder;
     }
+
 }
