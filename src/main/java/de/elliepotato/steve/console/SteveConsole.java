@@ -85,6 +85,16 @@ public class SteveConsole extends Thread {
                         steve.getJda().getPresence().setStatus(onlineStatus);
                         steve.getLogger().info("Status set to " + onlineStatus.name());
                         break;
+                    case "say":
+                        if (args.length < 2) {
+                            cu("say <channelId> <message>");
+                        } else {
+                            long channel = Long.parseLong(args[1]);
+                            final String message = UtilString.getFinalArg(args, 2);
+                            steve.getJda().getTextChannelById(channel).sendMessage(message).queue();
+                            steve.getLogger().info("Sent message '" + message + "' to '" + channel + "'.");
+                        }
+                        break;
                     case "info":
                     case "botinfo":
                         steve.getLogger().info("Existed since " + steve.getJda().getSelfUser().getCreationTime().format(DateTimeFormatter.RFC_1123_DATE_TIME));
