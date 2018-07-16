@@ -49,7 +49,7 @@ public class CmdBan extends Command {
             reason = UtilString.getFinalArg(args, 1);
         }
 
-        getBot().modLog(channel.getGuild(), getBot().getEmbedBuilder(Steve.DiscordColor.KICK)
+        getBot().modLog(channel.getGuild(), getBot().getEmbedBuilder(Steve.DiscordColor.BAN)
                 .setTitle("Banned " + toBan.getName() + "#" + toBan.getDiscriminator() + " (" + toBan.getId() + ")")
                 .addField("Banner", (sender.getUser().getName() + "#" + sender.getUser().getDiscriminator()), true)
                 .addField("Reason", (reason != null ? reason : "No reason specified."), false));
