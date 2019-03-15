@@ -4,10 +4,10 @@ import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.exceptions.ErrorResponseException;
-import net.dv8tion.jda.core.utils.PermissionUtil;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.internal.utils.PermissionUtil;
 import net.jodah.expiringmap.ExpiringMap;
 
 import java.util.LinkedList;
@@ -59,6 +59,9 @@ public class MessageHistory implements DataHolder {
         final LinkedList<Message> messages = getMessageHistory(member);
         if (!messages.isEmpty() && messages.size() == MAX_MESSAGE_REPEAT) {
 
+            boolean same = messages.stream().distinct().limit(2).count() <= 1;
+
+            /*
             boolean same = false;
             String lastMessage = null;
             for (Message s : messages) {
@@ -68,6 +71,7 @@ public class MessageHistory implements DataHolder {
                 }
                 lastMessage = content;
             }
+            */
 
             if (same) {
                 // bye bye.
@@ -80,10 +84,9 @@ public class MessageHistory implements DataHolder {
                 steve.modLog(member.getGuild(), steve.getEmbedBuilder(Steve.DiscordColor.KICK)
                         .setTitle("User kicked " + member.getUser().getName() + "#" + member.getUser().getDiscriminator() + " (" + member.getUser().getIdLong() + ")")
                         .addField("Reason", "Suspicious message activity.", false)
-                        .addField("Details", "Spamming \"" + lastMessage + "\"", false));
+                        .addField("Details", "Spamming \"" + messages.get(0) + "\"", false));
 
-                message.getGuild().getController().kick(member, "Suspicious message activity. Spamming \"" + lastMessage + "\"").queue();
-
+                message.getGuild().getController().kick(member, "Suspicious message activity. Spamming \"" + messages.get(0) + "\"").queue();
                 messageHistory.remove(member.getUser().getIdLong());
                 return false;
             }
@@ -103,7 +106,7 @@ public class MessageHistory implements DataHolder {
         Member member = message.getMember();
 
         final LinkedList<Message> messages = getMessageHistory(message.getMember());
-        if (messages.size() > MAX_MESSAGE_REPEAT) {
+        if (messages.size() >= MAX_MESSAGE_REPEAT) {
             messages.removeLast();
         }
 

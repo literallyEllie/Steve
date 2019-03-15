@@ -4,11 +4,10 @@ import com.google.common.base.Joiner;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.commands.CmdPromo;
 import de.elliepotato.steve.util.Constants;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 
-import java.sql.Connection;
 import java.util.List;
 
 /**
@@ -42,7 +41,7 @@ public class DumbResponder {
 
         if (msg.contains("daemon") && (msg.contains("110") || msg.contains("111"))) {
             steve.messageChannel(message.getChannel().getIdLong(), "Hi there, " + member.getAsMention() + ". " +
-                    "If you were talking about your console log not showing, it is just temporary and should be back soon! " +
+                    "If you were talking about your **console log** not showing, it is **just temporary** and should be back soon! " +
                     "If it persists after about 15 minutes you can open a ticket");
             return;
         }
@@ -58,18 +57,20 @@ public class DumbResponder {
 
         if (msg.matches("((can someone|i need) )?help( me)?( please)?\\??")) {
 
-            String newMsg = "Hi there, " + member.getAsMention() + ". If you are looking for help please specify the problems you're experiencing " +
-                    "(if you haven't already) as well as posting any problems in console via http://hastebin.com/ (if necessary). A real person will get to you soon!";
+            String newMsg = "Hi there, " + member.getAsMention() + ". If you are looking for help please **specify the problems** you're experiencing " +
+                    "(if you haven't already) as well as **posting any problems in console** via http://hastebin.com/ (if necessary). A real person will get to you soon!";
 
             if (message.getChannel().getIdLong() == Constants.CHAT_BISECT_GENERAL.getIdLong() || message.getChannel().getIdLong() ==
                     Constants.CHAT_MELON_GENERAL.getIdLong()) {
-                newMsg += " Also could you move help into <#" + (guild.getIdLong() == Constants.CHAT_BISECT_HELP.getIdLong() ?
-                        Constants.CHAT_BISECT_HELP.getIdLong() : Constants.CHAT_MELON_HELP.getIdLong() + ">");
+                newMsg += " **Also** could you ask your question in " + (guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ?
+                        Constants.CHAT_BISECT_HELP_SPIGOT_CRAFT_VAN.toString() + " or " + Constants.CHAT_BISECT_HELP_MODDED.toString() + ", if it doesn't fit into those categories ask in "
+                                + Constants.CHAT_BISECT_HELP_OTHER.toString()
+                        : Constants.CHAT_MELON_HELP_SPIGOT_CRAFT_VAN.toString() + " or " + Constants.CHAT_MELON_HELP_MODDED + ", if it doesn't fit into those categories ask in "
+                        + Constants.CHAT_MELON_HELP_OTHER) + " Thank you! :smile:";
             }
 
             steve.messageChannel(message.getChannel().getIdLong(), newMsg);
         }
-
 
 
     }

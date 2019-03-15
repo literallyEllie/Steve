@@ -5,10 +5,10 @@ import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 
 /**

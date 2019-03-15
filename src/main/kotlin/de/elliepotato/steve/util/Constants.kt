@@ -17,8 +17,16 @@ enum class Constants(val idLong: Long) {
     CHAT_BISECT_MOD(413086115717709824),
     CHAT_MELON_GENERAL(304743612212707339),
     CHAT_BISECT_GENERAL(304744201718071296),
+    @Deprecated("use specialist channel")
     CHAT_MELON_HELP(320099936672677890),
+    CHAT_MELON_HELP_SPIGOT_CRAFT_VAN(497480273638981652),
+    CHAT_MELON_HELP_MODDED(497480309458075648),
+    CHAT_MELON_HELP_OTHER(497482525908664349),
+    @Deprecated("use specialist channel")
     CHAT_BISECT_HELP(320099573592752135),
+    CHAT_BISECT_HELP_SPIGOT_CRAFT_VAN(497479599114944527),
+    CHAT_BISECT_HELP_MODDED(497479703641325568),
+    CHAT_BISECT_HELP_OTHER(497482450025316356),
     CHAT_MELON_AD(320100020978450433),
     CHAT_BISECT_AD(320099659890556931),
 
@@ -30,5 +38,13 @@ enum class Constants(val idLong: Long) {
     STAFF_DANIEL(325791100897853442),
 
     ;
+
+    override fun toString(): String {
+        return "<#" + idLong.toString() + ">"
+    }
+
+    fun isHelpChannel(): Boolean {
+        return Regex("CHAT_(BISECT|MELON)_HELP_.*").matches(name)
+    }
 
 }

@@ -7,11 +7,11 @@ import de.elliepotato.steve.Steve
  * at 04/02/2018
  */
 class CustomCommand(bot: Steve, label: String, description: String,
-                    val guildId: Long, var responseMessage: String): Command(bot, label, description) {
+                    val guildId: Long, var responseMessage: String) : Command(bot, label, description) {
 
     override fun abstractExecute(environment: CommandEnvironment) {
-        if (environment.channel.guild.idLong != guildId) return
-        bot.messageChannel(environment.channel, responseMessage)
+        if (guildId == 0L) bot.messageChannel(environment.channel, responseMessage)
+        // if (environment.channel.guild.idLong != guildId) return
     }
 
 

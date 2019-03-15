@@ -1,21 +1,25 @@
 package de.elliepotato.steve.chatmod;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.chatmod.help.DumbResponder;
 import de.elliepotato.steve.config.FileHandler;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import net.dv8tion.jda.core.utils.PermissionUtil;
+import de.elliepotato.steve.util.UtilTime;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.internal.utils.PermissionUtil;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,11 +31,14 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
 
     private final int MAX_MESSAGE_TAG = 8;
     private final int MAX_AD_LINE = 8; // line breaks
-    private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.))([^:/\\?\\=]+)\\b");
+    private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.))([^:/\\?\\=]+)\\b", Pattern.MULTILINE);
     private Steve bot;
 
     private FileHandler<Set<String>> domainsFile, blacklistedFile;
     private Set<String> allowedDomains, blacklistedDomains;
+
+    private Map<Long, Long> advertCooldown;
+    private long requiredAdCooldown;
 
     private MessageHistory messageHistory;
     private DumbResponder dumbResponder;
@@ -56,6 +63,9 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
             e.printStackTrace();
         }
         this.dumbResponder = new DumbResponder(bot);
+
+        this.advertCooldown = Maps.newHashMap();
+        this.requiredAdCooldown = TimeUnit.DAYS.toMillis(1);
     }
 
     @Override
@@ -107,10 +117,9 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
 
                 boolean bh = message.getGuild().getIdLong() == Constants.GUILD_BISECT.getIdLong();
 
-                bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", Please do not tag "
-                        + (bh ? "BH" : "MC") + " staff, they will not reply. Instead please wait for a ask in <#" +
-                        (bh ? String.valueOf(Constants.CHAT_BISECT_HELP.getIdLong()) : String.valueOf(Constants.CHAT_MELON_HELP.getIdLong())) +
-                        "> or open a ticket. (If your request was long, ask the Discord Moderators for it back)", 10, null);
+                bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", Please **do not tag** "
+                        + (bh ? "BH" : "MC") + " staff, they will not reply. Instead please wait for a ask in one of the **help channels**" +
+                        " or **open a ticket**. (If your request was long, ask the Discord Moderators for it back)", 10, null);
 
                 message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Tagging official staff", message.getTextChannel())));
                 return false;
@@ -150,23 +159,54 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
                 lineBreaks++;
                 if (lineBreaks > MAX_AD_LINE) {
 
-                    bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "Your advert is too long, please reconsider the size to make it smaller." +
+                    bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "Your advert is **too long**, please reconsider the size to make it smaller." +
                             " (Must fit in " + MAX_AD_LINE + " lines). If you want your advert back, please check your PMs.", 15, null);
                     bot.privateMessage(message.getAuthor(), "Your deleted advert: \n```" + message.getContentRaw() + "```");
 
-                    int finalLineBreaks = lineBreaks;
-                    message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines - " + finalLineBreaks
-                            + " > " + MAX_AD_LINE + ")", message.getTextChannel())));
+                    message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert too big (too many lines - > " + MAX_AD_LINE + ")",
+                            message.getTextChannel())));
                     return false;
                 }
 
             }
 
+            long lastMsg = advertCooldown.getOrDefault(message.getAuthor().getIdLong(), -1L);
+            if (lastMsg != -1) {
+                bot.getDebugger().write("last message existed");
+
+                if (!UtilTime.elapsed(lastMsg, requiredAdCooldown)) {
+                    bot.getDebugger().write("not elapsed");
+
+                    bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + "Your last advert was posted less than 24 hours ago, " +
+                                    "please wait and then post. If this is a revised advert please message a Discord Moderator and they can help you.", 10,
+                            message);
+
+                    message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advert posted before 24 hours waiting", message.getTextChannel())));
+                    return false;
+                }
+            }
+
+            bot.getDebugger().write("all good");
         }
+
         bot.getDebugger().write("Strict advert check, (message = " + content + ")");
 
         // Contains a URL?
-        if (!content.matches(".*\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.)).*")) return true;
+        if (!Pattern.compile(".*\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.))(.*)?", Pattern.MULTILINE).matcher(content).matches() &&
+                !Pattern.compile(".*\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b(:\\d{5})?.*", Pattern.MULTILINE).matcher(content).matches()) {
+            // doesn't contain URL -- is in ad channel?
+            if (!strict && bot.getDebugger().getEnabled()) {
+                bot.getDebugger().write("strict: false\n" + "content: `" + content + "` \n" +
+                        "match : " + content.matches(".*\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b(:\\d{5})?.*"));
+                bot.tempMessage(message.getChannel().getIdLong(), message.getAuthor().getAsMention() + ", your message doesn't look like a server advert and will " +
+                        "subsequently be deleted in **10 seconds**, please either talk in #general, if this is a mistake please tell a Discord Moderator.", 10, message);
+
+                bot.modLog(message.getGuild(), embedMessageDelete(message, "It appears to be a non ad-message.", message.getTextChannel()));
+                return false;
+            }
+
+            return true;
+        }
 
         matcher = REGEX_DOMAIN.matcher(content);
 
@@ -196,12 +236,18 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
                 }
 
                 bot.getDebugger().write("deleting ? " + hit);
-                if (!hit) return true;
+                if (!hit) {
+                    if (bot.getDebugger().getEnabled()) {
+                        advertCooldown.put(message.getAuthor().getIdLong(), System.currentTimeMillis());
+                        bot.getDebugger().write("put in");
+                    }
+                    return true;
+                }
 
             }
 
             // Tailor message
-            bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a " + (strict ? "blacklisted link." :
+            bot.tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a " + (!strict ? "blacklisted link." :
                     "non-authorised link, if you want to share links" +
                             " please say it in PMs.") + " If you want your message back, please ask staff.", 10, null);
             message.delete().queue(foo -> bot.modLog(message.getGuild(), embedMessageDelete(message, "Advertising (" + (strict ? "unauthorised" : "blacklisted") +
@@ -261,6 +307,10 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
      */
     public DumbResponder getDumbResponder() {
         return dumbResponder;
+    }
+
+    public Map<Long, Long> getAdvertCooldown() {
+        return advertCooldown;
     }
 
 }

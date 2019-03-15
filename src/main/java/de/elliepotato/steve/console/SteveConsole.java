@@ -2,8 +2,8 @@ package de.elliepotato.steve.console;
 
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.util.UtilString;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -52,27 +52,27 @@ public class SteveConsole extends Thread {
                     case "watching":
                         if (args.length < 2) {
                             cu((args[0].toLowerCase() + " <to>"));
-                            if (steve.getJda().getPresence().getGame() != null) {
-                                steve.getLogger().info("Steve is currently doing: " + steve.getJda().getPresence().getGame().getName());
+                            if (steve.getJda().getPresence().getActivity() != null) {
+                                steve.getLogger().info("Steve is currently doing: " + steve.getJda().getPresence().getActivity().getName());
                             }
                             break;
                         }
                         String to = UtilString.getFinalArg(args, 1);
                         switch (args[0].toLowerCase()) {
                             case "listening":
-                                steve.getJda().getPresence().setGame(Game.listening(to));
+                                steve.getJda().getPresence().setActivity(Activity.listening(to));
                                 break;
                             case "playing":
-                                steve.getJda().getPresence().setGame(Game.playing(to));
+                                steve.getJda().getPresence().setActivity(Activity.playing(to));
                                 break;
                             case "watching":
-                                steve.getJda().getPresence().setGame(Game.watching(to));
+                                steve.getJda().getPresence().setActivity(Activity.watching(to));
                                 break;
                         }
                         steve.getLogger().info("Now " + args[0].toLowerCase() + " to: " + to);
                         break;
                     case "status":
-                        if (args.length > 2) {
+                        if (args.length < 2) {
                             cu("status <online | idle | dnd | invisible | offline>");
                             steve.getLogger().info("Steve's current status is: " + steve.getJda().getPresence().getStatus().getKey());
                             break;
@@ -89,7 +89,13 @@ public class SteveConsole extends Thread {
                         if (args.length < 2) {
                             cu("say <channelId> <message>");
                         } else {
-                            long channel = Long.parseLong(args[1]);
+                            long channel;
+                            try {
+                                channel = Long.parseLong(args[1]);
+                            } catch (NumberFormatException e) {
+                                steve.getLogger().info("Invalid channel ID.");
+                                break;
+                            }
                             final String message = UtilString.getFinalArg(args, 2);
                             steve.getJda().getTextChannelById(channel).sendMessage(message).queue();
                             steve.getLogger().info("Sent message '" + message + "' to '" + channel + "'.");
@@ -97,7 +103,7 @@ public class SteveConsole extends Thread {
                         break;
                     case "info":
                     case "botinfo":
-                        steve.getLogger().info("Existed since " + steve.getJda().getSelfUser().getCreationTime().format(DateTimeFormatter.RFC_1123_DATE_TIME));
+                        steve.getLogger().info("Existed since " + steve.getJda().getSelfUser().getTimeCreated().format(DateTimeFormatter.RFC_1123_DATE_TIME));
                         steve.getLogger().info("ID " + steve.getJda().getSelfUser().getIdLong());
                         steve.getLogger().info("In " + steve.getJda().getGuilds().size() + " guilds");
                         steve.getLogger().info("With " + steve.getJda().getUsers().size() + " users");

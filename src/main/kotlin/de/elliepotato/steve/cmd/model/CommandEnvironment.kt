@@ -1,9 +1,9 @@
 package de.elliepotato.steve.cmd.model
 
 import com.google.common.base.Joiner
-import net.dv8tion.jda.core.entities.Member
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.TextChannel
 
 /**
  * @author Ellie for VentureNode LLC

@@ -7,8 +7,8 @@ import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.status.minecraft.FetcherMCStatus;
 import de.elliepotato.steve.status.minecraft.MCService;
 import de.elliepotato.steve.status.minecraft.MCServiceStatus;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

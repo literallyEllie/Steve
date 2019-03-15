@@ -6,11 +6,11 @@ import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.util.Constants;
 import de.elliepotato.steve.util.UtilString;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.utils.PermissionUtil;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**

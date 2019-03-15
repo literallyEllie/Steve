@@ -5,8 +5,8 @@ import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.chatmod.MessageChecker;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class CmdDomains extends Command {
                 }
                 break;
             default:
-                getBot().messageChannel(environment.getChannel(), correctUsage(""));
+                getBot().messageChannel(environment.getChannel(), correctUsage());
         }
 
     }

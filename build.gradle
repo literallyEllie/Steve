@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.30'
+    ext.kotlin_version = '1.2.51'
 
     repositories {
         mavenCentral()
@@ -11,7 +11,7 @@ buildscript {
 
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '1.2.4'
+    id 'com.github.johnrengelman.shadow' version '4.0.2'
     id 'application'
 }
 apply plugin: 'kotlin'
@@ -38,22 +38,25 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     // JDA
-    compile 'net.dv8tion:JDA:3.5.1_339'
+    compile 'net.dv8tion:JDA:4.ALPHA.0_63'
 
     // Logging
     compile "ch.qos.logback:logback-classic:1.2.3"
 
     // Backend
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '2.7.6'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.15'
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.1'
 
     // Util
     compile group: 'com.google.guava', name: 'guava', version: 'r05' // google utils
-    compile group: 'org.reflections', name: 'reflections', version: '0.9.10' // command registerer
+    compile group: 'org.reflections', name: 'reflections', version: '0.9.11' // command registerer
     compile 'net.jodah:expiringmap:0.5.8' // expiring hashmaps lol
+    compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.25' // Logging
+//    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25' // Logging
+//    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25' // Logging
 
     // JSON
-    compile "com.github.Arraying:Kotys:0.3.3"
+    compile "com.github.Arraying:Kotys:0.5.1"
 }
 
 shadowJar {
