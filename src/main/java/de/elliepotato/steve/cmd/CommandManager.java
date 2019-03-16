@@ -105,10 +105,6 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
             if (customCommand != null) {
 
-                System.out.println(customCommand.getResponseMessage());
-                System.out.println(customCommand.getGuildId());
-                System.out.println(customCommand.getDescription());
-
                 String[] argsNoLabel = null;
                 // rip
                 if (argsWLabel.length > 1) {

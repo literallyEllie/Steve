@@ -24,6 +24,11 @@ public class CmdMCStatus extends Command {
 
     private FetcherMCStatus mcStatus;
 
+    /**
+     * Check the current status of all official Mojang endpoints.
+     *
+     * @param steve Bot instance.
+     */
     public CmdMCStatus(Steve steve) {
         super(steve, "mcstatus", "Shows the current status of the Minecraft Servies", Lists.newArrayList(), Permission.MESSAGE_WRITE,
                 Lists.newArrayList());

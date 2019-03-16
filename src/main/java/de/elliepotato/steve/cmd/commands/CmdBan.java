@@ -41,8 +41,15 @@ public class CmdBan extends Command {
             return;
         }
 
-        if (!PermissionUtil.canInteract(channel.getGuild().getMember(getBot().getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), sender))
+        if (!PermissionUtil.canInteract(sender, channel.getGuild().getMember(toBan))) {
+            getBot().messageChannel(channel, ":x: You cannot ban that person.");
             return;
+        }
+
+        if (!PermissionUtil.canInteract(channel.getGuild().getSelfMember(), channel.getGuild().getMember(toBan))) {
+            getBot().messageChannel(channel, ":x: I cannot ban that person!");
+            return;
+        }
 
         String reason = null;
         if (args.length > 1) {
@@ -57,10 +64,11 @@ public class CmdBan extends Command {
         getBot().tempMessage(channel, ":ok_hand: Banned " + toBan.getName() + "#" + toBan.getDiscriminator() + " out this world (forever)! :eyes:"
                 + (reason != null ? " (`" + reason + "`)" : ""), 10, environment.getMessage());
 
-        if (reason != null) {
-            channel.getGuild().getController().ban(channel.getGuild().getMember(toBan), 1, reason).queue();
-        } else channel.getGuild().getController().ban(channel.getGuild().getMember(toBan), 1).queue();
 
+        String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
+
+        channel.getGuild().getController().ban(channel.getGuild().getMember(toBan), 1, reason != null ?
+                "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
     }
 
 }

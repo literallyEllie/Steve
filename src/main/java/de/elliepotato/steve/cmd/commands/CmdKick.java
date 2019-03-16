@@ -41,8 +41,15 @@ public class CmdKick extends Command {
             return;
         }
 
-        if (!PermissionUtil.canInteract(channel.getGuild().getMember(getBot().getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), sender))
+        if (!PermissionUtil.canInteract(sender, channel.getGuild().getMember(toKick))) {
+            getBot().messageChannel(channel, ":x: You cannot kick that person!");
             return;
+        }
+
+        if (!PermissionUtil.canInteract(channel.getGuild().getSelfMember(), channel.getGuild().getMember(toKick))) {
+            getBot().messageChannel(channel, ":x: I cannot kick that person!");
+            return;
+        }
 
         String reason = null;
         if (args.length > 1) {
@@ -57,9 +64,11 @@ public class CmdKick extends Command {
         getBot().tempMessage(channel, ":ok_hand: Kicked " + toKick.getName() + "#" + toKick.getDiscriminator() + " out this world. :eyes:"
                 + (reason != null ? " (`" + reason + "`)" : ""), 10, environment.getMessage());
 
-        if (reason != null) {
-            channel.getGuild().getController().kick(channel.getGuild().getMember(toKick), reason).queue();
-        } else channel.getGuild().getController().kick(channel.getGuild().getMember(toKick)).queue();
+
+        String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
+
+        channel.getGuild().getController().kick(channel.getGuild().getMember(toKick), reason != null ?
+                "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
     }
 
 }

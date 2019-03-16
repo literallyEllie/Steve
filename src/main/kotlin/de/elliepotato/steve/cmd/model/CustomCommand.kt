@@ -10,7 +10,7 @@ class CustomCommand(bot: Steve, label: String, description: String,
                     val guildId: Long, var responseMessage: String) : Command(bot, label, description) {
 
     override fun abstractExecute(environment: CommandEnvironment) {
-        if (guildId == 0L) bot.messageChannel(environment.channel, responseMessage)
+        bot.messageChannel(environment.channel, responseMessage)
         // if (environment.channel.guild.idLong != guildId) return
     }
 

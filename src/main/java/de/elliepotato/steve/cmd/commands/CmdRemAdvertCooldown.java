@@ -13,7 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 /**
- * @author Ellie :: 18/07/2018
+ * @author Ellie for VentureNode LLC
+ * at 18/07/2018
  */
 public class CmdRemAdvertCooldown extends Command {
 
