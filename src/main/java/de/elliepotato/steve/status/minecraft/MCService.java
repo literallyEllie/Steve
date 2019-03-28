@@ -13,7 +13,8 @@ public enum MCService {
     SESSION_SERVER("sessionserver.mojang.com", "Session Server"),
     API("api.mojang.com", "API"),
     TEXTURES("textures.minecraft.net", "Textures"),
-    MOJANG_COM("mojang.com", "Mojang.com"),;
+    MOJANG_COM("mojang.com", "Mojang.com"),
+    ;
 
     private String raw, prettyName;
 

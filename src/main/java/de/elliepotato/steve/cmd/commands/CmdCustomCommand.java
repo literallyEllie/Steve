@@ -7,10 +7,10 @@ import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.cmd.model.CustomCommand;
 import de.elliepotato.steve.util.UtilString;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -42,7 +42,7 @@ public class CmdCustomCommand extends Command {
             case "create":
                 // cc create <name> <response>
                 if (args.length < getMinArgs() + 2) {
-                    getBot().messageChannel(channel, correctUsage("create <name> --<description> --<response>"));
+                    getBot().messageChannel(channel, correctUsage("create <name> [--g[lobal]] --<description> --<response>"));
                     return;
                 }
 
@@ -61,21 +61,24 @@ public class CmdCustomCommand extends Command {
 
                 final String[] parts = UtilString.getFinalArg(args, 2).split("--");
 
+                boolean global;
                 String description;
                 String response;
+
                 if (parts.length > 2) {
-                    description = parts[1].trim();
-                    response = parts[2].trim();    // Lazy ezpz :D
+                    global = parts[1].trim().equalsIgnoreCase("g") || parts[1].trim().equalsIgnoreCase("global");
+                    description = parts[global ? 2 : 1].trim();
+                    response = parts[global ? 3 : 2].trim();    // bit lazy.
                 } else {
-                    getBot().messageChannel(channel, correctUsage("create <name> --<description> --<response>"));
+                    getBot().messageChannel(channel, correctUsage("create <name> [--g[lobal]] --<description> --<response>"));
                     return;
                 }
 
-                final CustomCommand customCommand = new CustomCommand(getBot(), label, description, channel.getGuild().getIdLong(), response);
-                getBot().getCustomCommandManager().addCustomCommand(channel.getGuild().getIdLong(), customCommand, true);
+                final CustomCommand customCommand = new CustomCommand(getBot(), label, description, global ? 0 : channel.getGuild().getIdLong(), response);
+                getBot().getCustomCommandManager().addCustomCommand(customCommand.getGuildId(), customCommand, true);
 
                 getBot().messageChannel(environment.getChannel(), getBot().getEmbedBuilder(Steve.DiscordColor.NEUTRAL)
-                        .setTitle("Custom command created!")
+                        .setTitle((global ? "Global " : "") + "Custom command created!")
                         .addField("Label", label, true).addField("Description", customCommand.getDescription(), true)
                         .addField("Response", customCommand.getResponseMessage(), true).build());
                 // woop
@@ -137,13 +140,13 @@ public class CmdCustomCommand extends Command {
 
                 // meh @ pagination
                 if (guildCommandMap != null) {
-                    guildCommandMap.values().forEach(customCommand1 -> embedBuilder.addField(customCommand1.getLabel(), customCommand1.getDescription(), false));
+                    guildCommandMap.values().forEach(customCommand1 -> embedBuilder.addField(customCommand1.getLabel(), (customCommand1.getGuildId() == 0L ? "[GLOBAL] " : "") + customCommand1.getDescription(), false));
                 }
 
                 getBot().messageChannel(channel.getIdLong(), embedBuilder.build());
                 break;
             default:
-                getBot().messageChannel(channel, correctUsage(""));
+                getBot().messageChannel(channel, correctUsage());
         }
 
     }

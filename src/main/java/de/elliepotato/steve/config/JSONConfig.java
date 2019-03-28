@@ -3,8 +3,8 @@ package de.elliepotato.steve.config;
 import com.google.common.base.Preconditions;
 import de.arraying.kotys.JSON;
 import de.arraying.kotys.JSONField;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 
 import java.io.*;
 
@@ -58,7 +58,7 @@ public class JSONConfig {
         final JSON template = new JSON()
                 .put("botToken", "example")
                 .put("commandPrefix", "!")
-                .put("gameType", "DEFAULT")
+                .put("gameType", Activity.ActivityType.DEFAULT)
                 .put("gameOf", "Test test 123!")
                 .put("botStatus", OnlineStatus.ONLINE.getKey())
                 .put("sql-host", "localhost")
@@ -120,7 +120,7 @@ public class JSONConfig {
     }
 
     /**
-     * @return The game type, should be assignable to {@link net.dv8tion.jda.core.entities.Game.GameType}.
+     * @return The game type, should be assignable to {@link net.dv8tion.jda.api.entities.Activity.ActivityType}.
      */
     public String getGameType() {
         return gameType;
@@ -191,7 +191,7 @@ public class JSONConfig {
 
         // Argument validation
         // will throw a IAE if bad
-        Game.GameType.valueOf(gameType.toUpperCase());
+        Activity.ActivityType.valueOf(gameType.toUpperCase());
         Preconditions.checkArgument(OnlineStatus.fromKey(botStatus.toLowerCase()) != OnlineStatus.UNKNOWN, "Online status not valid!");
     }
 

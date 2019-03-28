@@ -1,8 +1,7 @@
 package de.elliepotato.steve.util
 
 import de.elliepotato.steve.Steve
-import net.dv8tion.jda.core.entities.Channel
-import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.api.entities.MessageChannel
 
 /**
  * @author Ellie for VentureNode LLC
@@ -11,9 +10,9 @@ import net.dv8tion.jda.core.entities.TextChannel
 class DebugWriter(private val steve: Steve) {
 
     var enabled: Boolean = false
-    private lateinit var outputChannel: Channel
+    private lateinit var outputChannel: MessageChannel
 
-    fun toggle(outputChannel: Channel) {
+    fun toggle(outputChannel: MessageChannel) {
         this.enabled = !this.enabled
         this.outputChannel = outputChannel
         steve.messageChannel(outputChannel, "[DEBUG] Now ${if (enabled) "enabled" else "disabled"} debug mode.")

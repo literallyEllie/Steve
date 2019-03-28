@@ -26,12 +26,14 @@ public class MySQLManager implements DataHolder {
         final JSONConfig config = steve.getConfig();
 
         final HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl("jdbc:mysql://" + config.getSqlHost() + ":" + config.getSqlPort() + "/" + config.getSqlDatabase());
+        hikariConfig.setJdbcUrl("jdbc:mysql://" + config.getSqlHost() + ":" + config.getSqlPort() + "/" + config.getSqlDatabase() + "?serverTimezone=America/New_York");
         hikariConfig.setUsername(config.getSqlUsername());
         hikariConfig.setPassword(config.getSqlPassword());
         hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
         hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
         hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        //hikariConfig.addDataSourceProperty("useLegacyDatetimeCode", "false");
 
         dataSource = new HikariDataSource(hikariConfig);
     }

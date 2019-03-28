@@ -10,7 +10,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Ellie for VentureNode LLC
@@ -75,7 +74,13 @@ public class CustomCommandManager implements DataHolder {
      * @return All the custom commands of the guild, or an empty map if there are none.
      */
     public Map<String, CustomCommand> getCustomCommandsOf(long guildId) {
-        return customCommands.getOrDefault(guildId, Maps.newHashMap());
+        Map<String, CustomCommand> commands = customCommands.getOrDefault(guildId, Maps.newHashMap());
+
+        if (customCommands.containsKey(0L)) {
+            commands.putAll(customCommands.get(0L));
+        }
+
+        return commands;
     }
 
     /**
@@ -91,16 +96,16 @@ public class CustomCommandManager implements DataHolder {
             Map<String, CustomCommand> customCommandMap = Maps.newHashMap();
             customCommandMap.put(customCommand.getLabel().toLowerCase(), customCommand);
             customCommands.put(guildId, customCommandMap);
-            return;
-        }
+        } else {
 
-        final Map<String, CustomCommand> customCommandMap = getCustomCommandsOf(guildId);
-        if (customCommandMap.containsKey(customCommand.getLabel().toLowerCase())) {
-            customCommandMap.replace(customCommand.getLabel().toLowerCase(), customCommand);
-            return;
-        }
+            final Map<String, CustomCommand> customCommandMap = getCustomCommandsOf(guildId);
+            if (customCommandMap.containsKey(customCommand.getLabel().toLowerCase())) {
+                customCommandMap.replace(customCommand.getLabel().toLowerCase(), customCommand);
+                return;
+            }
 
-        customCommandMap.put(customCommand.getLabel().toLowerCase(), customCommand);
+            customCommandMap.put(customCommand.getLabel().toLowerCase(), customCommand);
+        }
 
         if (newCommand) {
 
