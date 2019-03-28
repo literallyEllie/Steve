@@ -1,7 +1,8 @@
-package de.elliepotato.steve.chatmod.help;
+package de.elliepotato.steve.chatmod.checks.help;
 
 import com.google.common.base.Joiner;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.chatmod.MessageCheck;
 import de.elliepotato.steve.cmd.commands.CmdPromo;
 import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.api.entities.Guild;
@@ -14,7 +15,7 @@ import java.util.List;
  * @author Ellie for VentureNode LLC
  * at 05/03/2018
  */
-public class DumbResponder {
+public class DumbResponder implements MessageCheck {
 
     private Steve steve;
 
@@ -33,7 +34,7 @@ public class DumbResponder {
      *
      * @param message the message sent.
      */
-    public void onMessage(Message message) {
+    public boolean check(Message message) {
         final Guild guild = message.getGuild();
         final Member member = message.getMember();
         final String msg = message.getContentRaw().toLowerCase();
@@ -43,7 +44,7 @@ public class DumbResponder {
             steve.messageChannel(message.getChannel().getIdLong(), "Hi there, " + member.getAsMention() + ". " +
                     "If you were talking about your **console log** not showing, it is **just temporary** and should be back soon! " +
                     "If it persists after about 15 minutes you can open a ticket");
-            return;
+            return true;
         }
 
         if (msg.matches("(are )?there any( current)? promo(tional)? codes( currently)?\\??")
@@ -52,7 +53,7 @@ public class DumbResponder {
             List<String> codes = ((CmdPromo) steve.getCommandManager().getCommand("promo", false)).getCodesOf(guild);
             steve.messageChannel(message.getChannel().getIdLong(), codes.isEmpty() ? "Sorry there are currently no promotional codes!" :
                     "Current codes: " + Joiner.on(", ").join(codes));
-            return;
+            return true;
         }
 
         if (msg.matches("((can someone|i need) )?help( me)?( please)?\\??")) {
@@ -73,6 +74,7 @@ public class DumbResponder {
         }
 
 
+        return true;
     }
 
 }

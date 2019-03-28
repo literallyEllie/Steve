@@ -1,9 +1,11 @@
-package de.elliepotato.steve.chatmod;
+package de.elliepotato.steve.chatmod.checks;
 
 import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.chatmod.MessageCheck;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
+import de.elliepotato.steve.util.UtilEmbed;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
@@ -18,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @author Ellie for VentureNode LLC
  * at 10/02/2018
  */
-public class MessageHistory implements DataHolder {
+public class MessageHistory implements DataHolder, MessageCheck {
 
     private final int MAX_MESSAGE_HISTORY_STORAGE = 30;
     private final int MAX_MESSAGE_REPEAT = 3;
@@ -50,7 +52,7 @@ public class MessageHistory implements DataHolder {
      * @param message The message to check
      * @return "true" if they are safe, "false" if they got rekt.
      */
-    public boolean call(Message message) {
+    public boolean check(Message message) {
         final Member member = message.getMember();
         if (!PermissionUtil.canInteract(message.getGuild().getMember(steve.getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), member))
             return true;
@@ -61,18 +63,6 @@ public class MessageHistory implements DataHolder {
 
             boolean same = messages.stream().distinct().limit(2).count() <= 1;
 
-            /*
-            boolean same = false;
-            String lastMessage = null;
-            for (Message s : messages) {
-                String content = s.getContentRaw();
-                if (lastMessage != null) {
-                    same = lastMessage.equalsIgnoreCase(content);
-                }
-                lastMessage = content;
-            }
-            */
-
             if (same) {
                 // bye bye.
                 messages.forEach(delMsg -> {
@@ -81,7 +71,7 @@ public class MessageHistory implements DataHolder {
                     } catch (ErrorResponseException ignored) {
                     }
                 });
-                steve.modLog(member.getGuild(), steve.getEmbedBuilder(Steve.DiscordColor.KICK)
+                steve.modLog(member.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.KICK)
                         .setTitle("User kicked " + member.getUser().getName() + "#" + member.getUser().getDiscriminator() + " (" + member.getUser().getIdLong() + ")")
                         .addField("Reason", "Suspicious message activity.", false)
                         .addField("Details", "Spamming \"" + messages.get(0) + "\"", false));
@@ -120,6 +110,12 @@ public class MessageHistory implements DataHolder {
         messages.add(message);
     }
 
+    /**
+     * Gets the message history of a user.
+     *
+     * @param member the member to get the message history of.
+     * @return their message history or an empty list of they have no cached history.
+     */
     private LinkedList<Message> getMessageHistory(Member member) {
         return messageHistory.getOrDefault(member.getUser().getIdLong(), Lists.newLinkedList());
     }

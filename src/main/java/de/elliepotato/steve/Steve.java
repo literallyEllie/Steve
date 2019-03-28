@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.3.9-SNAPSHOT";
+    public static final String VERSION = "1.3.10-SNAPSHOT";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger("Steve");
@@ -351,20 +351,6 @@ public class Steve {
     }
 
     /**
-     * Get the default embed builder.
-     *
-     * @param discordColor The color for the side bit to be
-     * @return A embed builder set with a timestamp, color of choose
-     * and footer of "AssimilationMC Development Team" and a lovely cake picture.
-     */
-    public EmbedBuilder getEmbedBuilder(DiscordColor discordColor) {
-        return new EmbedBuilder()
-                .setColor(discordColor.color)
-                .setTimestamp(Instant.now())
-                .setFooter("Just Steve-0 doing his job.", null);
-    }
-
-    /**
      * Attempt to parse from an input string to a {@link User}.
      * Will attempt to parse from: a raw ID, a mention or a User#Discrim
      *
@@ -411,21 +397,6 @@ public class Steve {
         return null;
     }
 
-    public enum DiscordColor {
 
-        KICK(new Color(232, 97, 39)),
-        BAN(new Color(183, 39, 11)),
-
-        MESSAGE_DELETE(new Color(32, 73, 155)),
-
-        NEUTRAL(new Color(24, 165, 45));
-
-        private Color color;
-
-        DiscordColor(Color color) {
-            this.color = color;
-        }
-
-    }
 
 }

@@ -2,6 +2,7 @@ package de.elliepotato.steve.cmd.commands;
 
 import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.chatmod.checks.CheckAdvert;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import net.dv8tion.jda.api.Permission;
@@ -35,7 +36,7 @@ public class CmdRemAdvertCooldown extends Command {
             return;
         }
 
-        final Map<Long, Long> advertCooldown = getBot().getMessageChecker().getAdvertCooldown();
+        final Map<Long, Long> advertCooldown = ((CheckAdvert) getBot().getMessageChecker().getMessageCheck(CheckAdvert.class)).getAdvertCooldown();
         if (!advertCooldown.containsKey(toReset.getIdLong())) {
             getBot().messageChannel(channel, ":x: That user had no cooldown to reset.");
             return;
