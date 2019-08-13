@@ -15,7 +15,7 @@ public class CmdReactSetup extends Command {
 
     public CmdReactSetup(Steve steve) {
         super(steve, "reactsetup", "Sets up the reaction system for the guild", Lists.newArrayList(), Permission.KICK_MEMBERS,
-                Lists.newArrayList("<channel>", "<message id>", "<emoji>"));
+                "<channel>", "<message id>", "<emoji>");
     }
 
     @Override

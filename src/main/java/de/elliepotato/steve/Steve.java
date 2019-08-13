@@ -1,6 +1,6 @@
 package de.elliepotato.steve;
 
-import ch.qos.logback.classic.Level;
+import com.google.common.base.Joiner;
 import de.elliepotato.steve.chatmod.MessageChecker;
 import de.elliepotato.steve.cmd.CommandManager;
 import de.elliepotato.steve.cmd.CustomCommandManager;
@@ -17,10 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -30,10 +28,11 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.3.10-SNAPSHOT";
+    public static final String VERSION = "1.3.13-RELEASE";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
-    private final Logger LOGGER = LoggerFactory.getLogger("Steve");
+    //private final LogHandle LOGGER;
+    private final Logger LOGGER = LoggerFactory.getLogger(Steve.class);
     private final DebugWriter DEBUG = new DebugWriter(this);
 
     private final Pattern PATTERN_USER = Pattern.compile("<@!?([0-9]+)>");
@@ -42,6 +41,7 @@ public class Steve {
     private JSONConfig config;
 
     private JDA jda;
+    private Thread mainThread;
 
     private CommandManager commandManager;
     private MySQLManager sqlManager;
@@ -51,6 +51,7 @@ public class Steve {
     private MessageChecker messageChecker;
 
     private SteveConsole steveConsole;
+
 
     /**
      * A project for the hosting companies MelonCube and BisectHosting.
@@ -78,8 +79,7 @@ public class Steve {
      */
     Steve() {
         Thread.currentThread().setName("Steve-Main");
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.INFO);
+        this.mainThread = Thread.currentThread();
         init();
     }
 
@@ -88,6 +88,10 @@ public class Steve {
      */
     private void init() {
         final long start = System.currentTimeMillis();
+
+        LOGGER.info("");
+        LOGGER.info("Starting Steve-0 bot v" + VERSION + " by " + Joiner.on(", ").join(AUTHORS));
+        LOGGER.info("");
 
         // Get config values
         config = new JSONConfig();
@@ -104,13 +108,11 @@ public class Steve {
                 config.validate();
             } catch (NullPointerException | IllegalArgumentException e) {
                 LOGGER.error("A config value is " + (e instanceof NullPointerException ? "null" : "invalid") + "!", e);
-                e.printStackTrace();
                 return;
             }
 
         } catch (IOException e) {
             LOGGER.error("Failed to setup config! Please check the environment", e);
-            e.printStackTrace();
             return;
         }
 
@@ -130,7 +132,6 @@ public class Steve {
                     .build();
         } catch (LoginException e) {
             LOGGER.error("Failed to setup JDA", e);
-            e.printStackTrace();
             return;
         }
 
@@ -139,7 +140,7 @@ public class Steve {
 
         LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) + "ms. Console thread starting.");
         this.steveConsole = new SteveConsole(this);
-        steveConsole.run();
+        steveConsole.start();
     }
 
     /**
@@ -147,7 +148,7 @@ public class Steve {
      *
      * @param exitCode What the program's exit code will be.
      *                 A Java "optional variable", if no input, it will be 0
-     *                 Else, will be the first entry to the array.
+     *                 Else, will be the first element to the array.
      */
     public void shutdown(int... exitCode) {
 
@@ -164,16 +165,10 @@ public class Steve {
             sqlManager.shutdown();
 
         if (jda != null)
-            jda.shutdown();
+            jda.shutdownNow();
 
-        if (steveConsole != null) {
-            try {
-                steveConsole.join();
-            } catch (InterruptedException e) {
-                LOGGER.error("Failed to terminate console thread!", e);
-                e.printStackTrace();
-            }
-        }
+        if (steveConsole != null)
+            steveConsole.interrupt();
 
         LOGGER.info("Bye bye!");
         System.exit((exitCode.length == 0 ? 0 : exitCode[0]));
@@ -212,6 +207,13 @@ public class Steve {
      */
     public JDA getJda() {
         return jda;
+    }
+
+    /**
+     * @return Main thread of application.
+     */
+    public Thread getMainThread() {
+        return mainThread;
     }
 
     /**
@@ -347,7 +349,10 @@ public class Steve {
      * @param embedBuilder The embed to log
      */
     public void modLog(Guild guild, EmbedBuilder embedBuilder) {
-        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.CHAT_BISECT_MOD.getIdLong() : Constants.CHAT_MELON_MOD.getIdLong()), embedBuilder.build());
+        final MessageEmbed build = embedBuilder.build();
+
+        getLogger().info("[Mod-Log] " + guild.getName() + ": " + build.getTitle());
+        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.CHAT_BISECT_MOD.getIdLong() : Constants.CHAT_MELON_MOD.getIdLong()), build);
     }
 
     /**

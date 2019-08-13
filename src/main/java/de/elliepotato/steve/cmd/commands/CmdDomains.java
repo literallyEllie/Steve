@@ -27,7 +27,7 @@ public class CmdDomains extends Command {
      */
     public CmdDomains(Steve steve) {
         super(steve, "domains", "Domain whitelist management", Lists.newArrayList(), Permission.MESSAGE_MANAGE,
-                Lists.newArrayList("<whitelist | blacklist> <domain.com>"));
+                "<whitelist | blacklist> <domain.com>");
     }
 
     @Override

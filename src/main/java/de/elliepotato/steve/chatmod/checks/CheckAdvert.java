@@ -25,7 +25,7 @@ public class CheckAdvert implements MessageCheck {
     private Map<Long, Long> advertCooldown;
     private long requiredAdCooldown;
 
-    public CheckAdvert (MessageChecker messageChecker) {
+    public CheckAdvert(MessageChecker messageChecker) {
         this.messageChecker = messageChecker;
         this.advertCooldown = Maps.newHashMap();
         this.requiredAdCooldown = TimeUnit.DAYS.toMillis(1);
@@ -41,13 +41,14 @@ public class CheckAdvert implements MessageCheck {
     public boolean check(Message message) {
         String content = message.getContentRaw();
         // if channel isn't advertise channel
-        final boolean isAdvertChannel = message.getChannel().getIdLong() != Constants.CHAT_BISECT_AD.getIdLong() &&
-                message.getChannel().getIdLong() != Constants.CHAT_MELON_AD.getIdLong();
+        final boolean isAdvertChannel = /*message.getChannel().getIdLong() == Constants.CHAT_BISECT_AD.getIdLong() ||
+                message.getChannel().getIdLong() == Constants.CHAT_MELON_AD.getIdLong()*/false; // !! Advert removed !!
 
         Matcher matcher = Pattern.compile("\n").matcher(content);
 
+        /*
         // stop unnecessary check, "if channel is an advert channel"
-        if (!isAdvertChannel) {
+        if (isAdvertChannel) {
             int lineBreaks = 0;
             while (matcher.find()) {
                 lineBreaks++;
@@ -85,8 +86,6 @@ public class CheckAdvert implements MessageCheck {
             messageChecker.getBot().getDebugger().write("all good");
         }
 
-        messageChecker.getBot().getDebugger().write("Strict advert check, (message = " + content + ")");
-
 
         /*
         // Contains a URL?
@@ -112,7 +111,8 @@ public class CheckAdvert implements MessageCheck {
         while (matcher.find()) {
             final String domain = matcher.group(5).toLowerCase().trim();
 
-            if (isAdvertChannel) {
+
+            //if (!isAdvertChannel) {
                 // For every allowed domain
                 for (String allowedDomain : messageChecker.getAllowedDomains()) {
                     // Does the checking domain contain the allowed domain?
@@ -121,35 +121,39 @@ public class CheckAdvert implements MessageCheck {
                         continue linkFinder;
 
                 }
-            } else {
-                messageChecker.getBot().getDebugger().write("not-advert-channel check ");
-                // If it is in an advert channel, check if the link is blacklisted or not.
-                boolean foundLink = false;
-                // For every denied domain
-                for (String deniedLink : messageChecker.getBlacklistedDomains()) {
-                    if (domain.contains(deniedLink.replace("www.", ""))) {
-                        foundLink = true;
-                        break;
-                    }
-                }
+            /*} else {
 
-                messageChecker.getBot().getDebugger().write("deleting ? " + foundLink);
-                if (!foundLink) {
-                    //if (bot.getDebugger().getEnabled()) {
-                    advertCooldown.put(message.getAuthor().getIdLong(), System.currentTimeMillis());
-                    // bot.getDebugger().write("put in");
-                    //}
-                    return true;
+            messageChecker.getBot().getDebugger().write("not-advert-channel check ");
+            // If it is in an advert channel, check if the link is blacklisted or not.
+            boolean foundLink = false;
+            // For every denied domain
+            for (String deniedLink : messageChecker.getBlacklistedDomains()) {
+                if (domain.contains(deniedLink.replace("www.", ""))) {
+                    foundLink = true;
+                    break;
                 }
-
             }
 
+            messageChecker.getBot().getDebugger().write("deleting ? " + foundLink);
+            if (!foundLink) {
+                //if (bot.getDebugger().getEnabled()) {
+                advertCooldown.put(message.getAuthor().getIdLong(), System.currentTimeMillis());
+                // bot.getDebugger().write("put in");
+                //}
+                return true;
+            }
+
+            //}
+
+             */
+
             // Tailor message
-            messageChecker.getBot().tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", your message contains a " + (!isAdvertChannel ? "blacklisted link." :
-                    "non-authorised link, if you want to share links" +
-                            " please say it in PMs.") + " If you want your message back, please ask staff.", 10, null);
+            messageChecker.getBot().tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() +
+                    ", your message contains a " + (/*!isAdvertChannel ? "blacklisted link." :*/
+                    "non-authorised link, if you want to share links please say it in PMs.") +
+                    " If you want your message back, please ask staff.", 10, null);
             message.delete().queue(foo -> messageChecker.getBot().modLog(message.getGuild(),
-                    UtilEmbed.moderatorDeletedMessage(message, "Advertising (" + (isAdvertChannel ? "unauthorised" : "blacklisted") + " link) in #" +
+                    UtilEmbed.moderatorDeletedMessage(message, "Advertising (" + /*(isAdvertChannel ?*/ "unauthorised" /*: "blacklisted")*/ + " link) in #" +
                             message.getChannel().getName(), message.getTextChannel()).addField("Match domain:", domain, true)));
             return false;
         }
@@ -163,4 +167,5 @@ public class CheckAdvert implements MessageCheck {
     public Map<Long, Long> getAdvertCooldown() {
         return advertCooldown;
     }
+
 }

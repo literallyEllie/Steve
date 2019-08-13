@@ -7,6 +7,7 @@ import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.status.minecraft.FetcherMCStatus;
 import de.elliepotato.steve.status.minecraft.MCService;
 import de.elliepotato.steve.status.minecraft.MCServiceStatus;
+import de.elliepotato.steve.util.UtilEmbed;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +31,7 @@ public class CmdMCStatus extends Command {
      * @param steve Bot instance.
      */
     public CmdMCStatus(Steve steve) {
-        super(steve, "mcstatus", "Shows the current status of the Minecraft Servies", Lists.newArrayList(), Permission.MESSAGE_WRITE,
-                Lists.newArrayList());
+        super(steve, "mcstatus", "Shows the current status of the Minecraft Servies", Lists.newArrayList(), Permission.MESSAGE_WRITE);
 
         mcStatus = new FetcherMCStatus(steve);
         new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -51,7 +51,7 @@ public class CmdMCStatus extends Command {
             return;
         }
 
-        final EmbedBuilder embedBuilder = getBot().getEmbedBuilder(Steve.DiscordColor.NEUTRAL);
+        final EmbedBuilder embedBuilder = UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL);
         embedBuilder.setTitle("Minecraft Server status")
                 .setDescription("These stats are collected every 5 minutes");
 

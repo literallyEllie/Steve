@@ -39,7 +39,8 @@ public class CheckTag implements MessageCheck {
                     || id == Constants.STAFF_ANDREW.getIdLong()
                     || id == Constants.STAFF_DANIEL.getIdLong()
                     || id == Constants.STAFF_AMBER.getIdLong()
-                    || id == Constants.STAFF_JACOB.getIdLong()) {
+                    || id == Constants.STAFF_JACOB.getIdLong()
+                    || id == Constants.STAFF_JOSH.getIdLong()) {
 
                 boolean bh = message.getGuild().getIdLong() == Constants.GUILD_BISECT.getIdLong();
 

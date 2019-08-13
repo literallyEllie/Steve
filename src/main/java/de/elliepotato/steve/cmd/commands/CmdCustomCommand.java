@@ -6,6 +6,7 @@ import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.cmd.model.CustomCommand;
+import de.elliepotato.steve.util.UtilEmbed;
 import de.elliepotato.steve.util.UtilString;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -29,7 +30,7 @@ public class CmdCustomCommand extends Command {
      */
     public CmdCustomCommand(Steve steve) {
         super(steve, "customcommands", "Custom command manager", Lists.newArrayList("cc"),
-                Permission.KICK_MEMBERS, Lists.newArrayList("<create | delete | set | list>"));
+                Permission.KICK_MEMBERS, "<create | delete | set | list>");
     }
 
     @Override
@@ -77,7 +78,7 @@ public class CmdCustomCommand extends Command {
                 final CustomCommand customCommand = new CustomCommand(getBot(), label, description, global ? 0 : channel.getGuild().getIdLong(), response);
                 getBot().getCustomCommandManager().addCustomCommand(customCommand.getGuildId(), customCommand, true);
 
-                getBot().messageChannel(environment.getChannel(), getBot().getEmbedBuilder(Steve.DiscordColor.NEUTRAL)
+                getBot().messageChannel(environment.getChannel(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL)
                         .setTitle((global ? "Global " : "") + "Custom command created!")
                         .addField("Label", label, true).addField("Description", customCommand.getDescription(), true)
                         .addField("Response", customCommand.getResponseMessage(), true).build());
@@ -126,7 +127,7 @@ public class CmdCustomCommand extends Command {
                 final String data = UtilString.getFinalArg(args, 3);
                 setValue(channel.getGuild().getIdLong(), command, customCommandValue, data);
 
-                getBot().messageChannel(environment.getChannel(), getBot().getEmbedBuilder(Steve.DiscordColor.NEUTRAL)
+                getBot().messageChannel(environment.getChannel(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL)
                         .setTitle("Custom command updated!")
                         .addField("Label", label, true).addField("Description", command.getDescription(), true)
                         .addField("Response", command.getResponseMessage(), true).build());
@@ -135,7 +136,7 @@ public class CmdCustomCommand extends Command {
             case "list":
                 final Map<String, CustomCommand> guildCommandMap = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong());
 
-                EmbedBuilder embedBuilder = getBot().getEmbedBuilder(Steve.DiscordColor.NEUTRAL)
+                EmbedBuilder embedBuilder = UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL)
                         .setTitle("Guild commands (" + (guildCommandMap != null ? guildCommandMap.size() : 0) + ")");
 
                 // meh @ pagination

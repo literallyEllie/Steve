@@ -27,8 +27,7 @@ public class CmdPromo extends Command {
      * @param steve the bot instance.
      */
     public CmdPromo(Steve steve) {
-        super(steve, "promo", "Tell Steve about the new hot promotions", Lists.newArrayList(), Permission.KICK_MEMBERS,
-                Lists.newArrayList("[code]"));
+        super(steve, "promo", "Tell Steve about the new hot promotions", Lists.newArrayList(), Permission.KICK_MEMBERS, "[code]");
         this.codes = Maps.newHashMap();
     }
 

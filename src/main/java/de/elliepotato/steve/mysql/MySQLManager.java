@@ -35,7 +35,11 @@ public class MySQLManager implements DataHolder {
         hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         //hikariConfig.addDataSourceProperty("useLegacyDatetimeCode", "false");
 
-        dataSource = new HikariDataSource(hikariConfig);
+        try {
+            dataSource = new HikariDataSource(hikariConfig);
+        } catch (Exception e) { //sql
+            steve.getLogger().error("failed to make connection to database", e);
+        }
     }
 
     @Override

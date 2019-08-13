@@ -21,7 +21,7 @@ public class CmdRemAdvertCooldown extends Command {
 
     public CmdRemAdvertCooldown(Steve steve) {
         super(steve, "remadvertcooldown", "Remove an advert cooldown of a person", Lists.newArrayList(), Permission.MESSAGE_MANAGE,
-                Lists.newArrayList("<person>"));
+                "<person>");
     }
 
     @Override

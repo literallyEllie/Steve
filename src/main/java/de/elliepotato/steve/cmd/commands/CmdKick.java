@@ -5,6 +5,7 @@ import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.util.Constants;
+import de.elliepotato.steve.util.UtilEmbed;
 import de.elliepotato.steve.util.UtilString;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -26,7 +27,7 @@ public class CmdKick extends Command {
      */
     public CmdKick(Steve steve) {
         super(steve, "kick", "Kick a user off the face of the Earth", Lists.newArrayList(), Permission.KICK_MEMBERS,
-                Lists.newArrayList("<target> [reason]"));
+        "<target>", "[reason]");
     }
 
     @Override
@@ -56,7 +57,7 @@ public class CmdKick extends Command {
             reason = UtilString.getFinalArg(args, 1);
         }
 
-        getBot().modLog(channel.getGuild(), getBot().getEmbedBuilder(Steve.DiscordColor.KICK)
+        getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.KICK)
                 .setTitle("Kicked " + toKick.getName() + "#" + toKick.getDiscriminator() + " (" + toKick.getId() + ")")
                 .addField("Kicker", (sender.getUser().getName() + "#" + sender.getUser().getDiscriminator()), true)
                 .addField("Reason", (reason != null ? reason : "No reason specified."), false));
@@ -67,7 +68,7 @@ public class CmdKick extends Command {
 
         String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
 
-        channel.getGuild().getController().kick(channel.getGuild().getMember(toKick), reason != null ?
+        channel.getGuild().kick(channel.getGuild().getMember(toKick), reason != null ?
                 "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
     }
 
