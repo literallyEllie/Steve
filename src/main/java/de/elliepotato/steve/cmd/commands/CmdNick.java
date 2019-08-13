@@ -15,8 +15,8 @@ import org.jetbrains.annotations.NotNull;
 public class CmdNick extends Command {
 
     public CmdNick(Steve steve) {
-        super(steve, "nick", "Forcefully change the nickname of another user", Lists.newArrayList(), Permission.KICK_MEMBERS, Lists.newArrayList(
-                "u:<user>", "t:<to>", "r:<reason>"));
+        super(steve, "nick", "Forcefully change the nickname of another user", Lists.newArrayList(), Permission.KICK_MEMBERS,
+                "u:<user>", "t:<to>", "r:<reason>");
     }
 
     @Override

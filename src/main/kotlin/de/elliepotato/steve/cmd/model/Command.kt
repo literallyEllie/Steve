@@ -12,12 +12,12 @@ import net.dv8tion.jda.internal.utils.PermissionUtil
  * at 03/02/2018
  */
 abstract class Command(val bot: Steve, val label: String, var description: String, val aliases: List<String> = Lists.newArrayList(),
-                       val permission: Permission = Permission.MESSAGE_WRITE, val usage: List<String> = Lists.newArrayList()) {
+                       val permission: Permission = Permission.MESSAGE_WRITE, vararg val usage: String) {
 
     val minArgs: Int
 
     init {
-        minArgs = usage.stream().filter { s -> s.contains("<") }.count().toInt()
+        minArgs = usage.asList().stream().filter { s -> s.contains("<") }.count().toInt()
     }
 
     /**

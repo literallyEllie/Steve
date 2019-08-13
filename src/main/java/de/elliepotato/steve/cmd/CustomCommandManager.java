@@ -51,7 +51,7 @@ public class CustomCommandManager implements DataHolder {
             }
             resultSet.close();
 
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             steve.getLogger().error("Failed to setup custom commands!", e);
             e.printStackTrace();
         }

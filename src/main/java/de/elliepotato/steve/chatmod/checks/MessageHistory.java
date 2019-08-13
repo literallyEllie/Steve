@@ -64,19 +64,25 @@ public class MessageHistory implements DataHolder, MessageCheck {
             boolean same = messages.stream().distinct().limit(2).count() <= 1;
 
             if (same) {
+
+                steve.modLog(member.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.KICK)
+                        .setTitle("User soft-banned " + member.getUser().getName() + "#" + member.getUser().getDiscriminator() + " (" + member.getUser().getIdLong() + ")")
+                        .addField("Reason", "Suspicious message activity.", false)
+                        .addField("Details", "Spamming \"" + messages.get(0) + "\"", false));
+
+                message.getGuild().ban(member, 1, "Suspicious message activity. Spamming \"" + messages.get(0) + "\"").queue();
+                message.getGuild().unban(member.getUser()).queue();
+
                 // bye bye.
+                /*
                 messages.forEach(delMsg -> {
                     try {
                         delMsg.delete().queue();
                     } catch (ErrorResponseException ignored) {
                     }
                 });
-                steve.modLog(member.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.KICK)
-                        .setTitle("User kicked " + member.getUser().getName() + "#" + member.getUser().getDiscriminator() + " (" + member.getUser().getIdLong() + ")")
-                        .addField("Reason", "Suspicious message activity.", false)
-                        .addField("Details", "Spamming \"" + messages.get(0) + "\"", false));
+                 */
 
-                message.getGuild().getController().kick(member, "Suspicious message activity. Spamming \"" + messages.get(0) + "\"").queue();
                 messageHistory.remove(member.getUser().getIdLong());
                 return false;
             }

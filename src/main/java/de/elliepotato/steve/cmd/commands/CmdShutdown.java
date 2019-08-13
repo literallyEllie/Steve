@@ -21,8 +21,7 @@ public class CmdShutdown extends Command {
      * @param steve The bot instance.
      */
     public CmdShutdown(Steve steve) {
-        super(steve, "shutdown", "Shutdown the bot", Lists.newArrayList(), Permission.KICK_MEMBERS,
-                Lists.newArrayList());
+        super(steve, "shutdown", "Shutdown the bot", Lists.newArrayList(), Permission.KICK_MEMBERS);
     }
 
     @Override

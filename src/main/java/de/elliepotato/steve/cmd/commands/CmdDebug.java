@@ -19,7 +19,7 @@ public class CmdDebug extends Command {
      * @param steve the bot instance.
      */
     public CmdDebug(Steve steve) {
-        super(steve, "debug", "Steve's debug system", Lists.newArrayList(), Permission.MESSAGE_MANAGE, Lists.newArrayList());
+        super(steve, "debug", "Steve's debug system", Lists.newArrayList(), Permission.MESSAGE_MANAGE);
     }
 
     @Override

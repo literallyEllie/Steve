@@ -5,6 +5,7 @@ import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.util.Constants;
+import de.elliepotato.steve.util.UtilEmbed;
 import de.elliepotato.steve.util.UtilString;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -25,8 +26,7 @@ public class CmdBan extends Command {
      * @param steve Bot instance.
      */
     public CmdBan(Steve steve) {
-        super(steve, "ban", "Ban a user (forever)", Lists.newArrayList(), Permission.KICK_MEMBERS,
-                Lists.newArrayList("<target> [reason]"));
+        super(steve, "ban", "Ban a user (forever)", Lists.newArrayList(), Permission.KICK_MEMBERS, "<target> [reason]");
     }
 
     @Override
@@ -56,7 +56,7 @@ public class CmdBan extends Command {
             reason = UtilString.getFinalArg(args, 1);
         }
 
-        getBot().modLog(channel.getGuild(), getBot().getEmbedBuilder(Steve.DiscordColor.BAN)
+        getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.BAN)
                 .setTitle("Banned " + toBan.getName() + "#" + toBan.getDiscriminator() + " (" + toBan.getId() + ")")
                 .addField("Banner", (sender.getUser().getName() + "#" + sender.getUser().getDiscriminator()), true)
                 .addField("Reason", (reason != null ? reason : "No reason specified."), false));
@@ -67,7 +67,7 @@ public class CmdBan extends Command {
 
         String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
 
-        channel.getGuild().getController().ban(channel.getGuild().getMember(toBan), 1, reason != null ?
+        channel.getGuild().ban(channel.getGuild().getMember(toBan), 1, reason != null ?
                 "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
     }
 

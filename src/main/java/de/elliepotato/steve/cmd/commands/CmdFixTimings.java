@@ -26,7 +26,7 @@ public class CmdFixTimings extends Command {
      */
     public CmdFixTimings(Steve steve) {
         super(steve, "fixtimings", "Fix a broken timings link ", Lists.newArrayList("ft"),
-                Permission.KICK_MEMBERS, Lists.newArrayList("link"));
+                Permission.KICK_MEMBERS, "link");
     }
 
     @Override
