@@ -8,13 +8,13 @@ import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.cmd.model.CustomCommand;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
@@ -104,6 +104,7 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
             final CustomCommand customCommand = getBot().getCustomCommandManager().getCustomCommandsOf(event.getGuild().getIdLong()).get(argsWLabel[0].toLowerCase());
 
             if (customCommand != null) {
+
                 String[] argsNoLabel = null;
                 // rip
                 if (argsWLabel.length > 1) {

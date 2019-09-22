@@ -6,8 +6,8 @@ import com.google.common.collect.Maps;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -27,8 +27,7 @@ public class CmdPromo extends Command {
      * @param steve the bot instance.
      */
     public CmdPromo(Steve steve) {
-        super(steve, "promo", "Tell Steve about the new hot promotions", Lists.newArrayList(), Permission.KICK_MEMBERS,
-                Lists.newArrayList("[code]"));
+        super(steve, "promo", "Tell Steve about the new hot promotions", Lists.newArrayList(), Permission.KICK_MEMBERS, "[code]");
         this.codes = Maps.newHashMap();
     }
 
@@ -39,7 +38,7 @@ public class CmdPromo extends Command {
         final String[] args = environment.getArgs();
 
         if (args.length < 1) {
-            getBot().messageChannel(environment.getChannel(), correctUsage(""));
+            getBot().messageChannel(environment.getChannel(), correctUsage());
             if (codes.containsKey(idLong)) {
                 getBot().messageChannel(environment.getChannel(), "Current promo codes:\n" + Joiner.on("\n").join(codes.get(idLong)));
             }

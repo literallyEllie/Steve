@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
-import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -19,7 +19,7 @@ public class CmdDebug extends Command {
      * @param steve the bot instance.
      */
     public CmdDebug(Steve steve) {
-        super(steve, "debug", "Steve's debug system", Lists.newArrayList(), Permission.MESSAGE_MANAGE, Lists.newArrayList());
+        super(steve, "debug", "Steve's debug system", Lists.newArrayList(), Permission.MESSAGE_MANAGE);
     }
 
     @Override

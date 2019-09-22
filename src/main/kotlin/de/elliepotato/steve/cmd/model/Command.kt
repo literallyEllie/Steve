@@ -3,21 +3,21 @@ package de.elliepotato.steve.cmd.model
 import com.google.common.base.Joiner
 import com.google.common.collect.Lists
 import de.elliepotato.steve.Steve
-import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.entities.Member
-import net.dv8tion.jda.core.utils.PermissionUtil
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.internal.utils.PermissionUtil
 
 /**
  * @author Ellie for VentureNode LLC
  * at 03/02/2018
  */
 abstract class Command(val bot: Steve, val label: String, var description: String, val aliases: List<String> = Lists.newArrayList(),
-                       val permission: Permission = Permission.MESSAGE_WRITE, val usage: List<String> = Lists.newArrayList()) {
+                       val permission: Permission = Permission.MESSAGE_WRITE, vararg val usage: String) {
 
     val minArgs: Int
 
     init {
-        minArgs = usage.stream().filter({ s -> s.contains("<") }).count().toInt()
+        minArgs = usage.asList().stream().filter { s -> s.contains("<") }.count().toInt()
     }
 
     /**
@@ -53,6 +53,7 @@ abstract class Command(val bot: Steve, val label: String, var description: Strin
     /**
      * A method to simply return the usage of the command, to be posted.
      */
+    @JvmOverloads
     fun correctUsage(moreStuff: String = "") = ":thumbsup: Correct usage: `${bot.config.commandPrefix}$label " +
             "${if (moreStuff.isEmpty()) Joiner.on(", ").join(usage) else moreStuff}` **-** $description."
 

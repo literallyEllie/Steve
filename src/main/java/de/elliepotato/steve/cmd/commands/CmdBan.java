@@ -5,12 +5,13 @@ import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.util.Constants;
+import de.elliepotato.steve.util.UtilEmbed;
 import de.elliepotato.steve.util.UtilString;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.utils.PermissionUtil;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -25,8 +26,7 @@ public class CmdBan extends Command {
      * @param steve Bot instance.
      */
     public CmdBan(Steve steve) {
-        super(steve, "ban", "Ban a user (forever)", Lists.newArrayList(), Permission.KICK_MEMBERS,
-                Lists.newArrayList("<target> [reason]"));
+        super(steve, "ban", "Ban a user (forever)", Lists.newArrayList(), Permission.KICK_MEMBERS, "<target> [reason]");
     }
 
     @Override
@@ -41,15 +41,22 @@ public class CmdBan extends Command {
             return;
         }
 
-        if (!PermissionUtil.canInteract(channel.getGuild().getMember(getBot().getJda().getUserById(Constants.PRESUMED_SELF.getIdLong())), sender))
+        if (!PermissionUtil.canInteract(sender, channel.getGuild().getMember(toBan))) {
+            getBot().messageChannel(channel, ":x: You cannot ban that person.");
             return;
+        }
+
+        if (!PermissionUtil.canInteract(channel.getGuild().getSelfMember(), channel.getGuild().getMember(toBan))) {
+            getBot().messageChannel(channel, ":x: I cannot ban that person!");
+            return;
+        }
 
         String reason = null;
         if (args.length > 1) {
             reason = UtilString.getFinalArg(args, 1);
         }
 
-        getBot().modLog(channel.getGuild(), getBot().getEmbedBuilder(Steve.DiscordColor.KICK)
+        getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.BAN)
                 .setTitle("Banned " + toBan.getName() + "#" + toBan.getDiscriminator() + " (" + toBan.getId() + ")")
                 .addField("Banner", (sender.getUser().getName() + "#" + sender.getUser().getDiscriminator()), true)
                 .addField("Reason", (reason != null ? reason : "No reason specified."), false));
@@ -57,10 +64,11 @@ public class CmdBan extends Command {
         getBot().tempMessage(channel, ":ok_hand: Banned " + toBan.getName() + "#" + toBan.getDiscriminator() + " out this world (forever)! :eyes:"
                 + (reason != null ? " (`" + reason + "`)" : ""), 10, environment.getMessage());
 
-        if (reason != null) {
-            channel.getGuild().getController().ban(channel.getGuild().getMember(toBan), 1, reason).queue();
-        } else channel.getGuild().getController().ban(channel.getGuild().getMember(toBan), 1).queue();
 
+        String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
+
+        channel.getGuild().ban(channel.getGuild().getMember(toBan), 1, reason != null ?
+                "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
     }
 
 }

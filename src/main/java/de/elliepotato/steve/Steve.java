@@ -1,24 +1,24 @@
 package de.elliepotato.steve;
 
+import com.google.common.base.Joiner;
 import de.elliepotato.steve.chatmod.MessageChecker;
 import de.elliepotato.steve.cmd.CommandManager;
 import de.elliepotato.steve.cmd.CustomCommandManager;
 import de.elliepotato.steve.config.JSONConfig;
 import de.elliepotato.steve.console.SteveConsole;
 import de.elliepotato.steve.mysql.MySQLManager;
+import de.elliepotato.steve.react.ReactManager;
 import de.elliepotato.steve.util.Constants;
 import de.elliepotato.steve.util.DebugWriter;
-import net.dv8tion.jda.core.*;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.*;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -28,10 +28,11 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.3.5-RELEASE";
+    public static final String VERSION = "1.3.13-RELEASE";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
-    private final Logger LOGGER = LoggerFactory.getLogger("Steve");
+    //private final LogHandle LOGGER;
+    private final Logger LOGGER = LoggerFactory.getLogger(Steve.class);
     private final DebugWriter DEBUG = new DebugWriter(this);
 
     private final Pattern PATTERN_USER = Pattern.compile("<@!?([0-9]+)>");
@@ -40,14 +41,17 @@ public class Steve {
     private JSONConfig config;
 
     private JDA jda;
+    private Thread mainThread;
 
     private CommandManager commandManager;
     private MySQLManager sqlManager;
     private CustomCommandManager customCommandManager;
+    private ReactManager reactManager;
 
     private MessageChecker messageChecker;
 
     private SteveConsole steveConsole;
+
 
     /**
      * A project for the hosting companies MelonCube and BisectHosting.
@@ -75,6 +79,7 @@ public class Steve {
      */
     Steve() {
         Thread.currentThread().setName("Steve-Main");
+        this.mainThread = Thread.currentThread();
         init();
     }
 
@@ -83,6 +88,10 @@ public class Steve {
      */
     private void init() {
         final long start = System.currentTimeMillis();
+
+        LOGGER.info("");
+        LOGGER.info("Starting Steve-0 bot v" + VERSION + " by " + Joiner.on(", ").join(AUTHORS));
+        LOGGER.info("");
 
         // Get config values
         config = new JSONConfig();
@@ -99,31 +108,30 @@ public class Steve {
                 config.validate();
             } catch (NullPointerException | IllegalArgumentException e) {
                 LOGGER.error("A config value is " + (e instanceof NullPointerException ? "null" : "invalid") + "!", e);
-                e.printStackTrace();
                 return;
             }
 
         } catch (IOException e) {
             LOGGER.error("Failed to setup config! Please check the environment", e);
-            e.printStackTrace();
             return;
         }
 
         // Listener registration
         this.commandManager = new CommandManager(this);
+        this.reactManager = new ReactManager(this);
         this.messageChecker = new MessageChecker(this);
 
         // Setup JDA (blocking).
         try {
             jda = new JDABuilder(AccountType.BOT)
                     .setToken(config.getBotToken())
-                    .setGame(Game.of(Game.GameType.valueOf(config.getGameType().toUpperCase()), config.getGameOf())) // we already know its valid.
+                    // Playing is now DEFAULT
+                    .setActivity(Activity.of(Activity.ActivityType.valueOf(config.getGameType().toUpperCase()), config.getGameOf())) // we already know its valid.
                     .setStatus(OnlineStatus.fromKey(config.getBotStatus().toLowerCase()))
-                    .addEventListener(messageChecker, commandManager)
-                    .buildBlocking();
-        } catch (LoginException | InterruptedException e) {
+                    .addEventListeners(messageChecker, commandManager, reactManager)
+                    .build();
+        } catch (LoginException e) {
             LOGGER.error("Failed to setup JDA", e);
-            e.printStackTrace();
             return;
         }
 
@@ -132,8 +140,7 @@ public class Steve {
 
         LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) + "ms. Console thread starting.");
         this.steveConsole = new SteveConsole(this);
-        steveConsole.run();
-
+        steveConsole.start();
     }
 
     /**
@@ -141,7 +148,7 @@ public class Steve {
      *
      * @param exitCode What the program's exit code will be.
      *                 A Java "optional variable", if no input, it will be 0
-     *                 Else, will be the first entry to the array.
+     *                 Else, will be the first element to the array.
      */
     public void shutdown(int... exitCode) {
 
@@ -158,16 +165,10 @@ public class Steve {
             sqlManager.shutdown();
 
         if (jda != null)
-            jda.shutdown();
+            jda.shutdownNow();
 
-        if (steveConsole != null) {
-            try {
-                steveConsole.join();
-            } catch (InterruptedException e) {
-                LOGGER.error("Failed to terminate console thread!", e);
-                e.printStackTrace();
-            }
-        }
+        if (steveConsole != null)
+            steveConsole.interrupt();
 
         LOGGER.info("Bye bye!");
         System.exit((exitCode.length == 0 ? 0 : exitCode[0]));
@@ -209,6 +210,13 @@ public class Steve {
     }
 
     /**
+     * @return Main thread of application.
+     */
+    public Thread getMainThread() {
+        return mainThread;
+    }
+
+    /**
      * @return The command manager.
      */
     public CommandManager getCommandManager() {
@@ -220,6 +228,13 @@ public class Steve {
      */
     public CustomCommandManager getCustomCommandManager() {
         return customCommandManager;
+    }
+
+    /**
+     * @return The react manager.
+     */
+    public ReactManager getReactManager() {
+        return reactManager;
     }
 
     /**
@@ -247,12 +262,12 @@ public class Steve {
     }
 
     /**
-     * Message any channel that implements {@link Channel}
+     * Message any channel that implements {@link net.dv8tion.jda.api.entities.MessageChannel}
      *
      * @param channel Channel ID
      * @param message Message to send
      */
-    public void messageChannel(Channel channel, String message) {
+    public void messageChannel(MessageChannel channel, String message) {
         messageChannel(channel.getIdLong(), message);
     }
 
@@ -269,12 +284,12 @@ public class Steve {
     }
 
     /**
-     * Message any channel that implements {@link Channel}
+     * Message any channel that implements {@link net.dv8tion.jda.api.entities.MessageChannel}
      *
      * @param channel Channel ID
      * @param message embed to send
      */
-    public void messageChannel(Channel channel, MessageEmbed message) {
+    public void messageChannel(MessageChannel channel, MessageEmbed message) {
         messageChannel(channel.getIdLong(), message);
     }
 
@@ -297,13 +312,13 @@ public class Steve {
     }
 
     /**
-     * Send a temporary message to a discord channel that implements {@link Channel} (aka all of them)
+     * Send a temporary message to a discord channel that implements {@link net.dv8tion.jda.api.entities.MessageChannel} (aka all of them)
      *
      * @param channel    The channel to send to
      * @param message    The message content
      * @param expireTime After what delay should the message be deleted
      */
-    public void tempMessage(Channel channel, String message, int expireTime, Message cleanupMsg) {
+    public void tempMessage(MessageChannel channel, String message, int expireTime, Message cleanupMsg) {
         tempMessage(channel.getIdLong(), message, expireTime, cleanupMsg);
     }
 
@@ -334,21 +349,10 @@ public class Steve {
      * @param embedBuilder The embed to log
      */
     public void modLog(Guild guild, EmbedBuilder embedBuilder) {
-        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.CHAT_BISECT_MOD.getIdLong() : Constants.CHAT_MELON_MOD.getIdLong()), embedBuilder.build());
-    }
+        final MessageEmbed build = embedBuilder.build();
 
-    /**
-     * Get the default embed builder.
-     *
-     * @param discordColor The color for the side bit to be
-     * @return A embed builder set with a timestamp, color of choose
-     * and footer of "AssimilationMC Development Team" and a lovely cake picture.
-     */
-    public EmbedBuilder getEmbedBuilder(DiscordColor discordColor) {
-        return new EmbedBuilder()
-                .setColor(discordColor.color)
-                .setTimestamp(Instant.now())
-                .setFooter("Just Steve-0 doing his job.", null);
+        getLogger().info("[Mod-Log] " + guild.getName() + ": " + build.getTitle());
+        messageChannel((guild.getIdLong() == Constants.GUILD_BISECT.getIdLong() ? Constants.CHAT_BISECT_MOD.getIdLong() : Constants.CHAT_MELON_MOD.getIdLong()), build);
     }
 
     /**
@@ -398,21 +402,6 @@ public class Steve {
         return null;
     }
 
-    public enum DiscordColor {
 
-        KICK(new Color(232, 97, 39)),
-        BAN(new Color(183, 39, 11)),
-
-        MESSAGE_DELETE(new Color(32, 73, 155)),
-
-        NEUTRAL(new Color(24, 165, 45));
-
-        private Color color;
-
-        DiscordColor(Color color) {
-            this.color = color;
-        }
-
-    }
 
 }

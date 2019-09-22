@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
-import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -21,8 +21,7 @@ public class CmdShutdown extends Command {
      * @param steve The bot instance.
      */
     public CmdShutdown(Steve steve) {
-        super(steve, "shutdown", "Shutdown the bot", Lists.newArrayList(), Permission.KICK_MEMBERS,
-                Lists.newArrayList());
+        super(steve, "shutdown", "Shutdown the bot", Lists.newArrayList(), Permission.KICK_MEMBERS);
     }
 
     @Override
