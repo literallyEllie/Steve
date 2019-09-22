@@ -3,6 +3,7 @@ package de.elliepotato.steve.cmd;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.chatmod.GuildRestriction;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.cmd.model.CustomCommand;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +35,8 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
     private Set<Long> stopMessagingMeMemory;
 
+    private Map<Long, GuildRestriction> guildRestrictions;
+
     /**
      * Manager to handle commands and borrowed methods from other Discord projects.
      *
@@ -42,6 +46,7 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
         this.bot = steve;
         this.commandMap = Maps.newHashMap();
         this.stopMessagingMeMemory = Sets.newHashSet();
+        this.guildRestrictions = Maps.newHashMap();
 
         new Reflections("de.elliepotato.steve.cmd.commands").getSubTypesOf(Command.class).forEach(aClass -> {
             try {
@@ -95,6 +100,7 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
         if (member.getUser().getIdLong() == Constants.PRESUMED_SELF.getIdLong() || member.getUser().isBot())
             return; // dont reply to self or bots.
 
+
         final String[] argsWLabel = msg.substring(bot.getConfig().getCommandPrefix().length()).split(" ");
 
         final Command command = getCommand(argsWLabel[0], true);
@@ -105,25 +111,20 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
             if (customCommand != null) {
 
-                String[] argsNoLabel = null;
-                // rip
-                if (argsWLabel.length > 1) {
-                    argsNoLabel = new String[argsWLabel.length - 1];
-                    System.arraycopy(argsWLabel, 1, argsNoLabel, 0, argsNoLabel.length);
-                }
+                // Check restrictions. If false, cannot run command.
+                if (!checkGuildRestrictions(guild, member, customCommand)) return;
 
+                final String[] argsNoLabel = constructNoLabelCommandArgs(argsWLabel);
                 customCommand.execute(new CommandEnvironment(customCommand, member, event.getChannel(), message, (argsNoLabel == null ? new String[0] : argsNoLabel)));
             }
 
             return;
         }
 
-        String[] argsNoLabel = null;
-        if (argsWLabel.length > 1) {
-            argsNoLabel = new String[argsWLabel.length - 1];
-            System.arraycopy(argsWLabel, 1, argsNoLabel, 0, argsNoLabel.length);
-        }
+        // Check restrictions. If false, cannot run command.
+        if (!checkGuildRestrictions(guild, member, command)) return;
 
+        final String[] argsNoLabel = constructNoLabelCommandArgs(argsWLabel);
         command.execute(new CommandEnvironment(command, member, event.getChannel(), message, (argsNoLabel == null ? new String[0] : argsNoLabel)));
     }
 
@@ -161,4 +162,32 @@ public class CommandManager extends ListenerAdapter implements DataHolder {
 
         return null;
     }
+
+    public GuildRestriction getGuildRestriction(long guildId) {
+        GuildRestriction guildRestriction = guildRestrictions.get(guildId);
+        if (guildRestriction == null)
+            this.guildRestrictions.put(guildId, (guildRestriction = new GuildRestriction()));
+
+        return guildRestriction;
+    }
+
+    public boolean checkGuildRestrictions(Guild guild, Member requester, Command command) {
+        // Only check cooldowns + restrictions for non-mods.
+        if (!PermissionUtil.canInteract(guild.getMemberById(Constants.PRESUMED_SELF.getIdLong()), requester))
+            return true;
+
+        final GuildRestriction guildRestriction = getGuildRestriction(guild.getIdLong());
+        return guildRestriction.attemptRunCommand(command.hashCode());
+    }
+
+
+    private String[] constructNoLabelCommandArgs(String[] rawArgs) {
+        String[] argsNoLabel = null;
+        if (rawArgs.length > 1) {
+            argsNoLabel = new String[rawArgs.length - 1];
+            System.arraycopy(rawArgs, 1, argsNoLabel, 0, argsNoLabel.length);
+        }
+        return argsNoLabel;
+    }
+
 }

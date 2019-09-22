@@ -9,4 +9,8 @@ public class UtilTime {
         return System.currentTimeMillis() - from > required;
     }
 
+    public static long now() {
+        return System.currentTimeMillis();
+    }
+
 }
