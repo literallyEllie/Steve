@@ -1,6 +1,7 @@
 package de.elliepotato.steve;
 
 import com.google.common.base.Joiner;
+import de.elliepotato.steve.booster.BoosterWatcher;
 import de.elliepotato.steve.chatmod.MessageChecker;
 import de.elliepotato.steve.cmd.CommandManager;
 import de.elliepotato.steve.cmd.CustomCommandManager;
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.3.13-RELEASE";
+    public static final String VERSION = "1.4.1-SNAPSHOT";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     //private final LogHandle LOGGER;
@@ -49,6 +50,8 @@ public class Steve {
     private ReactManager reactManager;
 
     private MessageChecker messageChecker;
+
+    private BoosterWatcher boosterWatcher;
 
     private SteveConsole steveConsole;
 
@@ -129,14 +132,17 @@ public class Steve {
                     .setActivity(Activity.of(Activity.ActivityType.valueOf(config.getGameType().toUpperCase()), config.getGameOf())) // we already know its valid.
                     .setStatus(OnlineStatus.fromKey(config.getBotStatus().toLowerCase()))
                     .addEventListeners(messageChecker, commandManager, reactManager)
-                    .build();
-        } catch (LoginException e) {
+                    .build()
+                    .awaitReady();
+        } catch (LoginException | InterruptedException e) {
             LOGGER.error("Failed to setup JDA", e);
             return;
         }
 
         this.sqlManager = new MySQLManager(this);
         this.customCommandManager = new CustomCommandManager(this);
+
+        this.boosterWatcher = new BoosterWatcher(this);
 
         LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) + "ms. Console thread starting.");
         this.steveConsole = new SteveConsole(this);
@@ -163,6 +169,9 @@ public class Steve {
 
         if (sqlManager != null)
             sqlManager.shutdown();
+
+        if (boosterWatcher != null)
+            boosterWatcher.shutdown();
 
         if (jda != null)
             jda.shutdownNow();
@@ -249,6 +258,13 @@ public class Steve {
      */
     public MessageChecker getMessageChecker() {
         return messageChecker;
+    }
+
+    /**
+     * @return The booster watcher.
+     */
+    public BoosterWatcher getBoosterWatcher() {
+        return boosterWatcher;
     }
 
     /**

@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public class CmdSlowMode extends Command {
 
     public CmdSlowMode(Steve steve) {
-        super(steve, "slowmode", "Set slow-mode for the server", Lists.newArrayList("sm"), Permission.KICK_MEMBERS, "[delay]");
+        super(steve, "slowmode", "Set slow-mode for the server and slow down bot responses", Lists.newArrayList("sm", "vegetate"), Permission.KICK_MEMBERS, "[delay]");
     }
 
     @Override
@@ -39,6 +39,10 @@ public class CmdSlowMode extends Command {
             }
 
         }
+
+
+        getBot().getCommandManager().getGuildRestriction(channel.getGuild().getIdLong()).setEnabled(newMode != 0);
+
 
         int finalNewMode = newMode;
         channel.getGuild().getCategories().stream()
