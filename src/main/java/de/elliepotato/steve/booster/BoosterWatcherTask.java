@@ -27,71 +27,77 @@ public class BoosterWatcherTask implements Runnable {
 
         boosterWatcher.getSteve().getLogger().info("Running booster checker task...");
 
-        liveBoosters = Maps.newHashMap();
-        recentlyStoppedBoosters = Maps.newHashMap();
+        try {
 
-        int newBoosters = 0;
-        int stoppedBoosters = 0;
+            liveBoosters = Maps.newHashMap();
+            recentlyStoppedBoosters = Maps.newHashMap();
 
-        for (Map.Entry<Long, Map<Long, GuildBooster>> boosterEntry : boosterWatcher.getStoredBoosters().entrySet()) {
-            final Long guildId = boosterEntry.getKey();
+            int newBoosters = 0;
+            int stoppedBoosters = 0;
 
-            final Map<Long, GuildBooster> storedBoosters = boosterEntry.getValue();
+            for (Map.Entry<Long, Map<Long, GuildBooster>> boosterEntry : boosterWatcher.getStoredBoosters().entrySet()) {
+                final Long guildId = boosterEntry.getKey();
 
-            final Map<Long, Member> liveBoosters = Maps.newHashMap();
-            for (Member member : boosterWatcher.getLiveBoostersOf(guildId)) {
-                liveBoosters.put(member.getIdLong(), member);
-            }
+                final Map<Long, GuildBooster> storedBoosters = boosterEntry.getValue();
 
-            Map<Long, GuildBooster> updatedLiveBoosters = Maps.newHashMap();
-
-            for (Map.Entry<Long, Member> liveBooster : liveBoosters.entrySet()) {
-                final Long boosterId = liveBooster.getKey();
-                final Member boosterMember = liveBooster.getValue();
-
-                if (!storedBoosters.containsKey(boosterId)) {
-                    // they are new.
-
-                    GuildBooster guildBooster = new GuildBooster(boosterId,
-                            boosterMember.getUser().getName() + "#" + boosterMember.getUser().getDiscriminator(), guildId, UtilTime.now());
-                    guildBooster.setJustDiscovered(true);
-                    newBoosters++;
-
-                    updatedLiveBoosters.put(boosterId, guildBooster);
-                    continue;
+                final Map<Long, Member> liveBoosters = Maps.newHashMap();
+                for (Member member : boosterWatcher.getLiveBoostersOf(guildId)) {
+                    liveBoosters.put(member.getIdLong(), member);
                 }
 
-                // Anyone else is still boosting.
-                updatedLiveBoosters.put(boosterId, storedBoosters.get(boosterId));
-            }
+                Map<Long, GuildBooster> updatedLiveBoosters = Maps.newHashMap();
 
-            // Compare updated and stored.
+                for (Map.Entry<Long, Member> liveBooster : liveBoosters.entrySet()) {
+                    final Long boosterId = liveBooster.getKey();
+                    final Member boosterMember = liveBooster.getValue();
 
-            for (GuildBooster oldBooster : storedBoosters.values()) {
+                    if (!storedBoosters.containsKey(boosterId)) {
+                        // they are new.
 
-                // they have stopped boosting.
-                if (!updatedLiveBoosters.containsKey(oldBooster.getBoosterId())) {
-                    if (!recentlyStoppedBoosters.containsKey(guildId))
-                        recentlyStoppedBoosters.put(guildId, Maps.newHashMap());
+                        GuildBooster guildBooster = new GuildBooster(boosterId,
+                                boosterMember.getUser().getName() + "#" + boosterMember.getUser().getDiscriminator(), guildId, UtilTime.now());
+                        guildBooster.setJustDiscovered(true);
+                        newBoosters++;
 
-                    recentlyStoppedBoosters.get(guildId).put(oldBooster.getBoosterId(), oldBooster);
-                    stoppedBoosters++;
+                        updatedLiveBoosters.put(boosterId, guildBooster);
+                        continue;
+                    }
+
+                    // Anyone else is still boosting.
+                    updatedLiveBoosters.put(boosterId, storedBoosters.get(boosterId));
                 }
 
+                // Compare updated and stored.
+
+                for (GuildBooster oldBooster : storedBoosters.values()) {
+
+                    // they have stopped boosting.
+                    if (!updatedLiveBoosters.containsKey(oldBooster.getBoosterId())) {
+                        if (!recentlyStoppedBoosters.containsKey(guildId))
+                            recentlyStoppedBoosters.put(guildId, Maps.newHashMap());
+
+                        recentlyStoppedBoosters.get(guildId).put(oldBooster.getBoosterId(), oldBooster);
+                        stoppedBoosters++;
+                    }
+
+                }
+
+                // Store live boosters.
+                if (!this.liveBoosters.containsKey(guildId))
+                    this.liveBoosters.put(guildId, Maps.newHashMap());
+
+                this.liveBoosters.get(guildId).putAll(updatedLiveBoosters);
             }
 
-            // Store live boosters.
-            if (!this.liveBoosters.containsKey(guildId))
-                this.liveBoosters.put(guildId, Maps.newHashMap());
+            boosterWatcher.getSteve().getLogger().info("Booster task finished. New boosters: " + newBoosters + ". Stopped boosters: " + stoppedBoosters);
 
-            this.liveBoosters.get(guildId).putAll(updatedLiveBoosters);
+            if (watcherCallback != null)
+                watcherCallback.onWatcherCheck();
+
+        } catch (Throwable e) {
+            boosterWatcher.getSteve().getLogger().error("Error running booster watcher task", e);
+            e.printStackTrace();
         }
-
-        boosterWatcher.getSteve().getLogger().info("Booster task finished. New boosters: " + newBoosters + ". Stopped boosters: " + stoppedBoosters);
-
-        if (watcherCallback != null)
-            watcherCallback.onWatcherCheck();
-
 
     }
 

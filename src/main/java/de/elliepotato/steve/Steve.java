@@ -21,6 +21,7 @@ import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.4.1-SNAPSHOT";
+    public static final String VERSION = "1.4.2-SNAPSHOT";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     //private final LogHandle LOGGER;
@@ -381,20 +382,16 @@ public class Steve {
     public User parseUser(String input) {
 
         // raw id
-        long id;
         try {
-            id = Long.parseLong(input);
-            return jda.getUserById(id);
+            return jda.getUserById(Long.parseLong(input));
         } catch (NumberFormatException e) {
         }
 
         // a mention
-        if (PATTERN_USER.matcher(input).matches()) {
+        final Matcher matcher = PATTERN_USER.matcher(input);
+        if (matcher.matches()) {
             try {
-                id = Long.parseLong((input.replace("<", "")
-                        .replace(">", "").replace("@", "")
-                        .replace("!", ""))); // idk
-                return jda.getUserById(id);
+                return jda.getUserById(Long.parseLong(matcher.group(1)));
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -405,10 +402,10 @@ public class Steve {
 
             final String[] parts = input.split("#");
             final String name = parts[0];
-            final String discrim = parts[1]; // not parsing to int cus 0006 == 6
+            final String discriminator = parts[1]; // not parsing to int cus 0006 == 6
 
             for (final User user : jda.getUsersByName(name, true)) {
-                if (user.getName().equalsIgnoreCase(name) && user.getDiscriminator().equals(discrim)) {
+                if (user.getName().equalsIgnoreCase(name) && user.getDiscriminator().equals(discriminator)) {
                     return user;
                 }
             }

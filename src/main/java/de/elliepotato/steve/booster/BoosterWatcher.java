@@ -126,6 +126,8 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
 
     @Override
     public void onWatcherCheck() {
+        steve.getLogger().info("Running booster watcher check callback.");
+
         this.boosters = watcherTask.getLiveBoosters();
 
         StringBuilder report = new StringBuilder();
@@ -151,7 +153,9 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
             report.append(Joiner.on(", ").join(longGuildBoosterMap.values().stream().map(GuildBooster::getBoosterUsername).collect(Collectors.toList()))).append("\n");
         });
 
-        if (report.length() != 0) {
+        if (!report.toString().trim().isEmpty()) {
+
+            steve.getLogger().info("AAA '" + report.toString() + "'");
 
             for (Long reportRecipient : REPORT_RECIPIENTS) {
                 steve.getJda().getUserById(reportRecipient).openPrivateChannel().complete().sendMessage(report.toString()).queue();
@@ -165,6 +169,7 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
         insertNewBoosters();
 
         this.boosters.values().forEach(longGuildBoosterMap -> longGuildBoosterMap.values().forEach(guildBooster -> guildBooster.setJustDiscovered(false)));
+        steve.getLogger().info("Booster watcher task finished.");
 
     }
 
