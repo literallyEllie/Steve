@@ -37,14 +37,13 @@ public class UtilEmbed {
      * @param channel Channel message was deleted from.
      * @return The embed builder template, with the title and reason filled in.
      */
-    public static EmbedBuilder moderatorDeletedMessage (Message message, String reason, TextChannel channel) {
+    public static EmbedBuilder moderatorDeletedMessage(Message message, String reason, TextChannel channel) {
         final User author = message.getAuthor();
         return getEmbedBuilder(EmbedColor.MESSAGE_DELETE)
                 .setTitle("Deleted message from " + author.getName() + "#" + author.getDiscriminator() + " (" + author.getIdLong() + ")" +
                         " in channel #" + channel.getName()).addField("Message content:", message.getContentRaw(), false)
                 .addField("Reason:", reason, false);
     }
-
 
 
     public enum EmbedColor {

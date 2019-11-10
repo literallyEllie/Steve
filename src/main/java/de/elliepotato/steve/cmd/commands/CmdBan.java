@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
-import de.elliepotato.steve.util.Constants;
 import de.elliepotato.steve.util.UtilEmbed;
 import de.elliepotato.steve.util.UtilString;
 import net.dv8tion.jda.api.Permission;

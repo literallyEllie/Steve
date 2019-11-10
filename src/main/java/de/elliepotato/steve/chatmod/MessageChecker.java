@@ -6,6 +6,7 @@ import de.elliepotato.steve.chatmod.checks.CheckAdvert;
 import de.elliepotato.steve.chatmod.checks.CheckTag;
 import de.elliepotato.steve.chatmod.checks.MessageHistory;
 import de.elliepotato.steve.chatmod.checks.help.DumbResponder;
+import de.elliepotato.steve.chatmod.checks.spam.CheckSpam;
 import de.elliepotato.steve.config.FileHandler;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
@@ -41,8 +42,8 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         this.allowedDomains = Sets.newHashSet();
         this.blacklistedFile = new BlacklistedDomainsFile(bot);
         this.blacklistedDomains = Sets.newHashSet();
-        this.messageChecks = Sets.newHashSet(new MessageHistory(bot), new CheckTag(this), new CheckAdvert(this),
-                new DumbResponder(bot));
+        this.messageChecks = Sets.newHashSet(new CheckSpam(bot), new MessageHistory(bot), new CheckTag(this),
+                new CheckAdvert(this), new DumbResponder(bot));
 
         try {
             this.allowedDomains = domainsFile.read();

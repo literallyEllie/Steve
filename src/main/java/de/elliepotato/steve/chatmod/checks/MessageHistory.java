@@ -8,7 +8,6 @@ import de.elliepotato.steve.util.Constants;
 import de.elliepotato.steve.util.UtilEmbed;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 import net.jodah.expiringmap.ExpiringMap;
 

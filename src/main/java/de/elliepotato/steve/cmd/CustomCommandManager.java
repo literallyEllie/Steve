@@ -123,7 +123,7 @@ public class CustomCommandManager implements DataHolder {
                     steve.getLogger().error("Failed to push custom command " + customCommand.getLabel() + "!");
                     e.printStackTrace();
                 }
-            }).run();
+            }).start();
 
         }
 
