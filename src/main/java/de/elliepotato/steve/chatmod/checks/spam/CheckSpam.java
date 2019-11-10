@@ -79,7 +79,7 @@ public class CheckSpam implements MessageCheck {
                 steve.messageChannel(Constants.CHAT_BISECT_STAFF.getIdLong(), "It is likely the **" +
                         (guildId == Constants.GUILD_BISECT.getIdLong() ? "Bisect" : "Melon") + " Discord** is under attack.\n" +
                         "Messages from regular members will **no longer** go through in this server until at least **30 seconds** has passed since the last message " +
-                        "from a regular member. To disable/if this is a false flag, do `/steve ok "
+                        "from a regular member. To disable/if this is a false flag, do `!steve ok "
                         + (guildId == Constants.GUILD_BISECT.getIdLong() ? "" : "m") + "`");
             } else {
                 steve.getLogger().info("[SPAM-ALERT] " + guildId + " restrictions have been turned off.");
