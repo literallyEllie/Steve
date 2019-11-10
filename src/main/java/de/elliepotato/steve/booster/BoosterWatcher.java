@@ -1,11 +1,9 @@
 package de.elliepotato.steve.booster;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.module.DataHolder;
-import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -29,13 +27,11 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
 
     private final static String TABLE = "steve_boosters";
     //                                                  Max                     Ellie (Debug)
-    private final Long[] REPORT_RECIPIENTS = new Long[] {303668659723829261L, 123188806349357062L};
+    private final Long[] REPORT_RECIPIENTS = new Long[]{303668659723829261L, 123188806349357062L};
 
     private final Steve steve;
-    private Map<Long, Map<Long, GuildBooster>> boosters;
-
-
     private final ScheduledExecutorService scheduledExecutorService;
+    private Map<Long, Map<Long, GuildBooster>> boosters;
     private BoosterWatcherTask watcherTask;
 
     public BoosterWatcher(Steve steve) {
@@ -59,7 +55,8 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
 
                 String boosterName;
                 final User boosterUserObj = steve.getJda().getUserById(boosterId);
-                if (boosterUserObj != null) boosterName = boosterUserObj.getName() + "#" + boosterUserObj.getDiscriminator();
+                if (boosterUserObj != null)
+                    boosterName = boosterUserObj.getName() + "#" + boosterUserObj.getDiscriminator();
                 else boosterName = resultSet.getString("booster_name");
 
                 final long guild = resultSet.getLong("guild");
@@ -136,7 +133,8 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
             final List<String> collectedBoosters = longGuildBoosterMap.values().stream().filter(GuildBooster::isJustDiscovered)
                     .map(GuildBooster::getBoosterUsername).collect(Collectors.toList());
 
-            if (!collectedBoosters.isEmpty()) report.append("New Boosters for server **").append(steve.getJda().getGuildById(guildId).getName()).append("**: ");
+            if (!collectedBoosters.isEmpty())
+                report.append("New Boosters for server **").append(steve.getJda().getGuildById(guildId).getName()).append("**: ");
 
             report.append(Joiner.on(", ").join(collectedBoosters)).append("\n");
         });
@@ -148,7 +146,8 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
         recentlyStoppedBoosters.forEach((guildId, longGuildBoosterMap) -> {
             if (report.length() != 0) report.append("\n");
 
-            if (!longGuildBoosterMap.isEmpty()) report.append("Boosters who have stopped boosting server **").append(steve.getJda().getGuildById(guildId).getName()).append("**: ");
+            if (!longGuildBoosterMap.isEmpty())
+                report.append("Boosters who have stopped boosting server **").append(steve.getJda().getGuildById(guildId).getName()).append("**: ");
 
             report.append(Joiner.on(", ").join(longGuildBoosterMap.values().stream().map(GuildBooster::getBoosterUsername).collect(Collectors.toList()))).append("\n");
         });

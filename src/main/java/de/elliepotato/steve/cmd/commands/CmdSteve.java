@@ -3,8 +3,11 @@ package de.elliepotato.steve.cmd.commands;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
+import de.elliepotato.steve.chatmod.MessageCheck;
+import de.elliepotato.steve.chatmod.checks.spam.CheckSpam;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
+import de.elliepotato.steve.util.Constants;
 import de.elliepotato.steve.util.UtilEmbed;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -62,6 +65,29 @@ public class CmdSteve extends Command {
                 EmbedBuilder commandList = UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL);
                 getBot().getCommandManager().getCommandMap().values().forEach(command -> commandList.addField(command.getLabel(), command.getDescription(), false));
                 getBot().messageChannel(environment.getChannel(), commandList.build());
+            } else if (args[0].equalsIgnoreCase("ok")) {
+
+                long guild = environment.getChannel().getGuild().getIdLong();
+                if (args.length > 1) {
+                    try {
+                        guild = Long.parseLong(args[1]);
+                    } catch (NumberFormatException e) {
+                        if (args[1].startsWith("m")) {
+                            guild = Constants.GUILD_MELON.getIdLong();
+                        } else guild = Constants.GUILD_BISECT.getIdLong();
+                    }
+                }
+
+                final MessageCheck messageCheck = getBot().getMessageChecker().getMessageCheck(CheckSpam.class);
+                if (messageCheck != null) {
+                    getBot().messageChannel(environment.getChannel(), "Manually resetting for guild " + guild);
+                    ((CheckSpam) messageCheck).manualReset(guild);
+                    getBot().getLogger().info("[Mod-Log] " + member.getId() + " (" + member.getEffectiveName() + ") manully" +
+                            " reset the spam filter for guild " + guild);
+                } else {
+                    getBot().messageChannel(environment.getChannel(), "Spam check is not registered.");
+                }
+
             } else {
                 getBot().messageChannel(environment.getChannel(), helpStaff);
             }

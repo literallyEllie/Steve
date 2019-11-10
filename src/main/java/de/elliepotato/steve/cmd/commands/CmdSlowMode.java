@@ -59,9 +59,9 @@ public class CmdSlowMode extends Command {
 
         getBot().messageChannel(channel, ":thumbsup: " + (newMode != 0 ? "Enabled (" + newMode + "s delay)" : "Disabled") + " slow-mode for the server.");
         getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL)
-                    .setTitle((newMode != 0 ? "Enabled" : "Disabled") + " slow-mode for the server.")
-                    .addField("Delay:", newMode + "s", false)
-                    .addField("Sent by:", environment.getSender().getEffectiveName() + "#" + environment.getSender().getUser().getDiscriminator(), false));
+                .setTitle((newMode != 0 ? "Enabled" : "Disabled") + " slow-mode for the server.")
+                .addField("Delay:", newMode + "s", false)
+                .addField("Sent by:", environment.getSender().getEffectiveName() + "#" + environment.getSender().getUser().getDiscriminator(), false));
     }
 
 }

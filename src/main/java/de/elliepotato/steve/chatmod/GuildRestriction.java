@@ -1,8 +1,6 @@
 package de.elliepotato.steve.chatmod;
 
 import com.google.common.collect.Maps;
-import de.elliepotato.steve.cmd.commands.CmdSlowMode;
-import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.util.UtilTime;
 
 import java.util.Map;

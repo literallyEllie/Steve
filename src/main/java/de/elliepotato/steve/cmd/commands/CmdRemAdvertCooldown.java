@@ -36,6 +36,7 @@ public class CmdRemAdvertCooldown extends Command {
             return;
         }
 
+        /*
         final Map<Long, Long> advertCooldown = ((CheckAdvert) getBot().getMessageChecker().getMessageCheck(CheckAdvert.class)).getAdvertCooldown();
         if (!advertCooldown.containsKey(toReset.getIdLong())) {
             getBot().messageChannel(channel, ":x: That user had no cooldown to reset.");
@@ -44,6 +45,8 @@ public class CmdRemAdvertCooldown extends Command {
 
         advertCooldown.remove(toReset.getIdLong());
         getBot().messageChannel(channel, ":white_check_mark: Reset.");
+         */
+        getBot().messageChannel(channel, "This command is no longer active.");
     }
 
 }

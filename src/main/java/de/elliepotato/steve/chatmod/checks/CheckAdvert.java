@@ -1,15 +1,10 @@
 package de.elliepotato.steve.chatmod.checks;
 
-import com.google.common.collect.Maps;
 import de.elliepotato.steve.chatmod.MessageCheck;
 import de.elliepotato.steve.chatmod.MessageChecker;
-import de.elliepotato.steve.util.Constants;
 import de.elliepotato.steve.util.UtilEmbed;
-import de.elliepotato.steve.util.UtilTime;
 import net.dv8tion.jda.api.entities.Message;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,13 +17,9 @@ public class CheckAdvert implements MessageCheck {
     private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.))([^:/\\?\\=]+)\\b", Pattern.MULTILINE);
 
     private MessageChecker messageChecker;
-    private Map<Long, Long> advertCooldown;
-    private long requiredAdCooldown;
 
     public CheckAdvert(MessageChecker messageChecker) {
         this.messageChecker = messageChecker;
-        this.advertCooldown = Maps.newHashMap();
-        this.requiredAdCooldown = TimeUnit.DAYS.toMillis(1);
     }
 
     /**
@@ -67,13 +58,6 @@ public class CheckAdvert implements MessageCheck {
         }
 
         return true;
-    }
-
-    /**
-     * @return the advert cooldowns.
-     */
-    public Map<Long, Long> getAdvertCooldown() {
-        return advertCooldown;
     }
 
 }
