@@ -136,7 +136,8 @@ public class CustomCommandManager implements DataHolder {
      * @param label   The label of the custom command to delete.
      */
     public void deleteCustomCommand(long guildId, String label) {
-        if (!customCommands.containsKey(guildId)) return;
+        if (guildId != 0 && !customCommands.containsKey(guildId))
+            return;
 
         final CustomCommand customCommand = customCommands.get(guildId).get(label.toLowerCase());
         if (customCommand == null)

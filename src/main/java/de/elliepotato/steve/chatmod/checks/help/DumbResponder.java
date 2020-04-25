@@ -39,7 +39,6 @@ public class DumbResponder implements MessageCheck {
         final Member member = message.getMember();
         final String msg = message.getContentRaw().toLowerCase();
 
-
         if (msg.contains("daemon") && (msg.contains("110") || msg.contains("111"))) {
             steve.messageChannel(message.getChannel().getIdLong(), "Hi there, " + member.getAsMention() + ". " +
                     "If you were talking about your **console log** not showing, it is **just temporary** and should be back soon! " +
@@ -72,7 +71,6 @@ public class DumbResponder implements MessageCheck {
 
             steve.messageChannel(message.getChannel().getIdLong(), newMsg);
         }
-
 
         return true;
     }

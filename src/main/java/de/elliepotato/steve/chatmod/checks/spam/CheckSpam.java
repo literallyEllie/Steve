@@ -1,9 +1,11 @@
 package de.elliepotato.steve.chatmod.checks.spam;
 
 import com.google.common.collect.Maps;
+import com.sun.javafx.tk.PermissionHelper;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.chatmod.MessageCheck;
 import de.elliepotato.steve.util.Constants;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
@@ -29,17 +31,21 @@ public class CheckSpam implements MessageCheck {
         return this.guildSpamViolationHandleMap.getOrDefault(guild, new GuildSpamViolationHandle()).isAlerted();
     }
 
-    public void manualReset(long guild) {
+    public boolean manualReset(long guild) {
         final GuildSpamViolationHandle spamViolationHandle = this.guildSpamViolationHandleMap.get(guild);
         if (spamViolationHandle == null)
-            return;
+            return false;
 
         spamViolationHandle.reset();
+        return true;
     }
 
     @Override
     public boolean check(Message message) {
         final Guild guild = message.getGuild();
+
+        if (message.getCategory().getIdLong() == Constants.CAT_BISECT_FUN.getIdLong())
+            return true;
 
         GuildSpamViolationHandle handle = guildSpamViolationHandleMap.get(guild.getIdLong());
         if (handle == null)
@@ -60,32 +66,29 @@ public class CheckSpam implements MessageCheck {
         GuildSpamViolationHandle spamViolationHandle = new GuildSpamViolationHandle();
 
         spamViolationHandle.setViolationTriggerListener((alerted, violationLevel) -> {
+            boolean bisect = guildId == Constants.GUILD_BISECT.getIdLong();
+
+            final Guild guildById = steve.getJda().getGuildById(guildId);
+            long everyoneId = bisect ? Constants.ROLE_BISECT_EVERYONE.getIdLong() : Constants.ROLE_MELON_EVERYONE.getIdLong();
 
             if (alerted) {
-                /*
-                steve.getJda().getGuildById(guildId).getCategories().stream()
-                        .filter(guildChannel -> guildChannel.getIdLong() != Constants.CAT_MELON_STAFF.getIdLong()
-                                && guildChannel.getIdLong() != Constants.CAT_BISECT_STAFF.getIdLong())
-                        .forEach(guildChannel -> {
-
-                            for (GuildChannel textChannel : guildChannel.getChannels()) {
-                                if (textChannel.getType() != ChannelType.TEXT) continue;
-                                textChannel.getManager().setSlowmode(300).queue();
-                            }
-
-                        });
-                 */
                 steve.getLogger().info("[SPAM-ALERT] " + guildId + " likely under attack (VL " + violationLevel + ")");
                 steve.messageChannel(Constants.CHAT_BISECT_STAFF.getIdLong(), "It is likely the **" +
-                        (guildId == Constants.GUILD_BISECT.getIdLong() ? "Bisect" : "Melon") + " Discord** is under attack.\n" +
-                        "Messages from regular members will **no longer** go through in this server until at least **30 seconds** has passed since the last message " +
+                        (bisect ? "Bisect" : "Melon") + " Discord** is under attack.\n" +
+                        "Messages from < level 1 members will **no longer** go through in this server until at least **1 minute** has passed since the last message " +
                         "from a regular member. To disable/if this is a false flag, do `!steve ok "
-                        + (guildId == Constants.GUILD_BISECT.getIdLong() ? "" : "m") + "`");
+                        + (bisect ? "" : "m") + "`");
+
+                guildById.getRoleById(everyoneId).getManager()
+                        .revokePermissions(Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_WRITE);
             } else {
                 steve.getLogger().info("[SPAM-ALERT] " + guildId + " restrictions have been turned off.");
                 steve.messageChannel(Constants.CHAT_BISECT_STAFF.getIdLong(), "The **" +
-                        (guildId == Constants.GUILD_BISECT.getIdLong() ? "Bisect" : "Melon") + " Discord** is no longer detected to be " +
+                        (bisect ? "Bisect" : "Melon") + " Discord** is no longer detected to be " +
                         "under attack and restrictions have been disabled.");
+
+                guildById.getRoleById(everyoneId).getManager()
+                        .givePermissions(Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_WRITE);
             }
 
         });

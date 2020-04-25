@@ -25,8 +25,8 @@ public class CmdFixTimings extends Command {
      * @param steve the bot instance
      */
     public CmdFixTimings(Steve steve) {
-        super(steve, "fixtimings", "Fix a broken timings link ", Lists.newArrayList("ft"),
-                Permission.KICK_MEMBERS, "link");
+        super(steve, "fixtimings", "Fix a broken timings link ", Lists.newArrayList("ft"), Permission.MESSAGE_WRITE,
+                "<link>");
     }
 
     @Override

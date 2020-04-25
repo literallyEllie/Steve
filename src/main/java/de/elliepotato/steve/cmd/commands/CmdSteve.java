@@ -11,6 +11,7 @@ import de.elliepotato.steve.util.Constants;
 import de.elliepotato.steve.util.UtilEmbed;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
@@ -81,9 +82,19 @@ public class CmdSteve extends Command {
                 final MessageCheck messageCheck = getBot().getMessageChecker().getMessageCheck(CheckSpam.class);
                 if (messageCheck != null) {
                     getBot().messageChannel(environment.getChannel(), "Manually resetting for guild " + guild);
-                    ((CheckSpam) messageCheck).manualReset(guild);
-                    getBot().getLogger().info("[Mod-Log] " + member.getId() + " (" + member.getEffectiveName() + ") manully" +
-                            " reset the spam filter for guild " + guild);
+                    if (((CheckSpam) messageCheck).manualReset(guild)) {
+                        final Guild guildById = getBot().getJda().getGuildById(guild);
+
+                        guildById.getRoleById(guild == Constants.GUILD_BISECT.getIdLong() ? Constants.ROLE_BISECT_EVERYONE.getIdLong()
+                                : Constants.ROLE_MELON_EVERYONE.getIdLong()).getManager()
+                                .givePermissions(Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_WRITE);
+
+                        getBot().getLogger().info("[Mod-Log] " + member.getId() + " (" + member.getEffectiveName() + ") manually" +
+                                " reset the spam filter for guild " + guildById.getName());
+                    } else {
+                        getBot().messageChannel(environment.getChannel(), "Server not found.");
+                    }
+
                 } else {
                     getBot().messageChannel(environment.getChannel(), "Spam check is not registered.");
                 }

@@ -47,7 +47,6 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
                     "`started` BIGINT NOT NULL, " +
                     "INDEX(guild)) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1").execute();
 
-
             final ResultSet resultSet = connection.prepareStatement("SELECT * FROM `" + TABLE + "`").executeQuery();
             while (resultSet.next()) {
 
@@ -123,15 +122,15 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
 
     @Override
     public void onWatcherCheck() {
-        steve.getLogger().info("Running booster watcher check callback.");
-
         this.boosters = watcherTask.getLiveBoosters();
 
         StringBuilder report = new StringBuilder();
         this.boosters.forEach((guildId, longGuildBoosterMap) -> {
 
-            final List<String> collectedBoosters = longGuildBoosterMap.values().stream().filter(GuildBooster::isJustDiscovered)
-                    .map(GuildBooster::getBoosterUsername).collect(Collectors.toList());
+            final List<String> collectedBoosters = longGuildBoosterMap.values().stream()
+                    .filter(GuildBooster::isJustDiscovered)
+                    .map(GuildBooster::getBoosterUsername)
+                    .collect(Collectors.toList());
 
             if (!collectedBoosters.isEmpty())
                 report.append("New Boosters for server **").append(steve.getJda().getGuildById(guildId).getName()).append("**: ");
@@ -153,9 +152,6 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
         });
 
         if (!report.toString().trim().isEmpty()) {
-
-            steve.getLogger().info("AAA '" + report.toString() + "'");
-
             for (Long reportRecipient : REPORT_RECIPIENTS) {
                 steve.getJda().getUserById(reportRecipient).openPrivateChannel().complete().sendMessage(report.toString()).queue();
             }
@@ -168,8 +164,6 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
         insertNewBoosters();
 
         this.boosters.values().forEach(longGuildBoosterMap -> longGuildBoosterMap.values().forEach(guildBooster -> guildBooster.setJustDiscovered(false)));
-        steve.getLogger().info("Booster watcher task finished.");
-
     }
 
     private void deleteStaleBoosters(Collection<Map<Long, GuildBooster>> boosters) {
@@ -186,7 +180,6 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
             }
 
             statement.executeBatch();
-
         } catch (SQLException e) {
             steve.getLogger().error("Failed to delete stale boosters!");
             e.printStackTrace();

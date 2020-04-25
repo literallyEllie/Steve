@@ -42,15 +42,9 @@ public class CheckTag implements MessageCheck {
                     || id == Constants.STAFF_JACOB.getIdLong()
                     || id == Constants.STAFF_JOSH.getIdLong()) {
 
-                boolean bh = message.getGuild().getIdLong() == Constants.GUILD_BISECT.getIdLong();
-
-                messageChecker.getBot().tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", Please **do not tag** "
-                        + (bh ? "BH" : "MC") + " staff, they will not reply. Instead please wait for a ask in one of the **help channels**" +
-                        " or **open a ticket**. (If your request was long, ask the Discord Moderators for it back)", 10, null);
-
-                message.delete().queue(foo -> messageChecker.getBot().modLog(message.getGuild(),
-                        UtilEmbed.moderatorDeletedMessage(message, "Tagging official staff", message.getTextChannel())));
-                return false;
+                messageChecker.getBot().tempMessage(message.getTextChannel(), message.getAuthor().getAsMention() + ", Our official staff are very busy and are not always available in Discord. " +
+                        "If you require immediate assistance from them please create a support ticket instead. Thank you.", 10, null);
+                return true;
             }
 
             hits++;

@@ -17,7 +17,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'de.elliepotato.steve'
-version '1.4.4-RELEASE'
+version '1.4.7-RELEASE'
 
 mainClassName = "de.elliepotato.steve.Main"
 

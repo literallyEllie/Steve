@@ -40,9 +40,7 @@ public class CmdSlowMode extends Command {
 
         }
 
-
         getBot().getCommandManager().getGuildRestriction(channel.getGuild().getIdLong()).setEnabled(newMode != 0);
-
 
         int finalNewMode = newMode;
         channel.getGuild().getCategories().stream()
