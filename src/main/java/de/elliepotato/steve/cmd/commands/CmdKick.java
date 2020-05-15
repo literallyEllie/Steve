@@ -37,7 +37,7 @@ public class CmdKick extends Command {
 
         final User toKick = getBot().parseUser(args[0]);
         if (toKick == null) {
-            getBot().messageChannel(channel, ":x: " + sender.getAsMention() + ", I couldn't find user `" + args[0] + "`.");
+            environment.replyBadSyntax(sender.getAsMention() + ", I couldn't find user `" + args[0] + "`.");
             return;
         }
 
@@ -47,7 +47,7 @@ public class CmdKick extends Command {
         }
 
         if (!PermissionUtil.canInteract(channel.getGuild().getSelfMember(), channel.getGuild().getMember(toKick))) {
-            getBot().messageChannel(channel, ":x: I cannot kick that person!");
+            environment.replyBadSyntax(":x: I cannot kick that person!");
             return;
         }
 
@@ -56,19 +56,21 @@ public class CmdKick extends Command {
             reason = UtilString.getFinalArg(args, 1);
         }
 
-        getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.KICK)
-                .setTitle("Kicked " + toKick.getName() + "#" + toKick.getDiscriminator() + " (" + toKick.getId() + ")")
-                .addField("Kicker", (sender.getUser().getName() + "#" + sender.getUser().getDiscriminator()), true)
-                .addField("Reason", (reason != null ? reason : "No reason specified."), false));
-
-        getBot().tempMessage(channel, ":ok_hand: Kicked " + toKick.getName() + "#" + toKick.getDiscriminator() + " out this world. :eyes:"
-                + (reason != null ? " (`" + reason + "`)" : ""), 10, environment.getMessage());
-
 
         String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
 
         channel.getGuild().kick(channel.getGuild().getMember(toKick), reason != null ?
                 "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
+
+        getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.KICK)
+                .setTitle("Kicked " + toKick.getName() + "#" + toKick.getDiscriminator() + " (" + toKick.getId() + ")")
+                .addField("Kicker", signature, true)
+                .addField("Reason", (reason != null ? reason : "No reason specified."), false));
+
+        environment.replySuccess("Kicked " + toKick.getName() + "#" + toKick.getDiscriminator() + " out this world. :eyes:"
+                + (reason != null ? " (`" + reason + "`)" : ""));
+
+
     }
 
 }

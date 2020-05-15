@@ -7,6 +7,7 @@ import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import de.elliepotato.steve.cmd.model.CustomCommand;
 import de.elliepotato.steve.util.UtilEmbed;
+import de.elliepotato.steve.util.UtilPagination;
 import de.elliepotato.steve.util.UtilString;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -21,6 +22,8 @@ import java.util.Map;
  * at 05/02/2018
  */
 public class CmdCustomCommand extends Command {
+
+    private static final int LIST_MAX_PER_PAGE = 10;
 
     /**
      * A command to easily manage custom commands which are can be utilized by everyone throughout the servers
@@ -43,20 +46,20 @@ public class CmdCustomCommand extends Command {
             case "create":
                 // cc create <name> <response>
                 if (args.length < getMinArgs() + 2) {
-                    getBot().messageChannel(channel, correctUsage("create <name> [--g[lobal]] --<description> --<response>"));
+                    environment.reply(correctUsage("create <name> [--g[lobal]] --<description> --<response>"));
                     return;
                 }
 
                 String label = args[1].toLowerCase();
 
                 if (getBot().getCommandManager().getCommand(label, true) != null) {
-                    getBot().tempMessage(channel, sender.getAsMention() + ", the command name `" + label + "` is reserved.", 7, null);
+                    environment.replyBadSyntax(sender.getAsMention() + ", the command name `" + label + "` is reserved.");
                     return;
                 }
 
                 final Map<String, CustomCommand> customCommandMap = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong());
                 if (customCommandMap != null && customCommandMap.containsKey(label)) {
-                    getBot().tempMessage(channel, sender.getAsMention() + ", the custom command by `" + label + "` already exist on this server.", 7, null);
+                    environment.replyBadSyntax(sender.getAsMention() + ", the custom command by `" + label + "` already exist on this server.");
                     return;
                 }
 
@@ -71,7 +74,7 @@ public class CmdCustomCommand extends Command {
                     description = parts[global ? 2 : 1].trim();
                     response = parts[global ? 3 : 2].trim();    // bit lazy.
                 } else {
-                    getBot().messageChannel(channel, correctUsage("create <name> [--g[lobal]] --<description> --<response>"));
+                    environment.reply(correctUsage("create <name> [--g[lobal]] --<description> --<response>"));
                     return;
                 }
 
@@ -88,25 +91,24 @@ public class CmdCustomCommand extends Command {
             case "delete":
                 // "cc delete <name>"
                 if (args.length < getMinArgs() + 1) {
-                    getBot().messageChannel(channel, correctUsage("create <name>"));
+                    environment.reply(correctUsage("delete <name>"));
                     return;
                 }
                 label = args[1].toLowerCase();
 
                 final Map<String, CustomCommand> guildCommands = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong());
                 if (!guildCommands.containsKey(label)) {
-                    getBot().tempMessage(channel, sender.getAsMention() + ", the custom command by `" + label + "` doesn't exist for this server.", 7, null);
+                    environment.replyBadSyntax(sender.getAsMention() + ", the custom command by `" + label + "` doesn't exist for this server.");
                     return;
                 }
 
-                getBot().getCustomCommandManager().deleteCustomCommand(channel.getGuild().getIdLong(), label);
-                getBot().messageChannel(channel, "Custom command `" + label + "` deleted!");
-
+                getBot().getCustomCommandManager().deleteCustomCommand(guildCommands.get(label).getGuildId(), label);
+                environment.replySuccess("Custom command `" + label + "` deleted!");
                 break;
             case "set":
                 // "cc set <name> <type> <value>"
                 if (args.length < getMinArgs() + 3) {
-                    getBot().messageChannel(channel, correctUsage("set <name> <" + Joiner.on(" | ").join(CustomCommandValue.values()) + "> <value>"));
+                    environment.reply(correctUsage("set <name> <" + Joiner.on(" | ").join(CustomCommandValue.values()) + "> <value>"));
                     return;
                 }
 
@@ -114,13 +116,13 @@ public class CmdCustomCommand extends Command {
 
                 CustomCommand command = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong()).get(label);
                 if (command == null) {
-                    getBot().tempMessage(channel, sender.getAsMention() + ", the custom command by `" + label + "` doesn't exist for this server.", 7, null);
+                    environment.replyBadSyntax(sender.getAsMention() + ", the custom command by `" + label + "` doesn't exist for this server.");
                     return;
                 }
 
                 final CustomCommandValue customCommandValue = CustomCommandValue.fromString(args[2]);
                 if (customCommandValue == null) {
-                    getBot().tempMessage(channel, sender.getAsMention() + ", invalid custom command type `" + args[2] + "`.", 7, null);
+                    environment.replyBadSyntax(sender.getAsMention() + ", invalid custom command type `" + args[2] + "`.");
                     return;
                 }
 
@@ -134,20 +136,48 @@ public class CmdCustomCommand extends Command {
 
                 break;
             case "list":
-                final Map<String, CustomCommand> guildCommandMap = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong());
-
-                EmbedBuilder embedBuilder = UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL)
-                        .setTitle("Guild commands (" + (guildCommandMap != null ? guildCommandMap.size() : 0) + ")");
-
-                // meh @ pagination
-                if (guildCommandMap != null) {
-                    guildCommandMap.values().forEach(customCommand1 -> embedBuilder.addField(customCommand1.getLabel(), (customCommand1.getGuildId() == 0L ? "[GLOBAL] " : "") + customCommand1.getDescription(), false));
+                int page = 0;
+                if (args.length > getMinArgs()) {
+                    try {
+                        page = Integer.parseInt(args[1]) - 1;
+                    } catch (NumberFormatException e) {
+                        environment.replyBadSyntax("Invalid page number (" + args[1] + ") " + correctUsage("list [page]"));
+                        return;
+                    }
                 }
 
-                getBot().messageChannel(channel.getIdLong(), embedBuilder.build());
+                getBot().getDebugger().write("Loading page " + page);
+
+                final Map<String, CustomCommand> guildCommandMap = getBot().getCustomCommandManager().getCustomCommandsOf(channel.getGuild().getIdLong());
+
+                if (guildCommandMap != null) {
+                    int maxPages = UtilPagination.getPageCount(guildCommandMap.size(), LIST_MAX_PER_PAGE);
+                    if (page >= maxPages) {
+                        page = maxPages - 1;
+                    }
+
+                    EmbedBuilder embedBuilder = UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL)
+                            .setTitle("Server Commands (Page " + (page + 1) + "/" + maxPages + ")");
+
+                    final CustomCommand[] commandArray = guildCommandMap.values().toArray(new CustomCommand[0]);
+                    final int pageElementIndex = UtilPagination.getPageElementIndex(page, maxPages, LIST_MAX_PER_PAGE);
+
+                    getBot().getDebugger().write("Max pages " + maxPages + " , page elemt" + pageElementIndex);
+
+                    for (int i = pageElementIndex; i < Math.min(commandArray.length, pageElementIndex + LIST_MAX_PER_PAGE); i++) {
+                        final CustomCommand cmd = commandArray[i];
+                        embedBuilder.addField(cmd.getLabel(), (cmd.getGuildId() == 0L ? "[GLOBAL] " : "") + cmd.getDescription(), false);
+                    }
+
+                    environment.reply(embedBuilder.build());
+                } else {
+                    environment.reply("There are no custom commands for this server yet.");
+                    return;
+                }
+
                 break;
             default:
-                getBot().messageChannel(channel, correctUsage());
+                environment.reply(correctUsage());
         }
 
     }

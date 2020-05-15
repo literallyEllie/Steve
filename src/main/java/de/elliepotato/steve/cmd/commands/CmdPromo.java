@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class CmdPromo extends Command {
 
-    private Map<Long, List<String>> codes;
+    private final Map<Long, List<String>> codes;
 
     /**
      * A command for auto responses of promotional deals.
@@ -59,8 +59,7 @@ public class CmdPromo extends Command {
             added = true;
         }
 
-        getBot().tempMessage(environment.getChannel(), (added ? ":thumbsup: Added" : ":thumbsdown: Removed") + " the promo code " + code + ".", 7,
-                null);
+        environment.replySuccess((added ? ":thumbsup: Added" : ":thumbsdown: Removed") + " the promo code `" + code + "`.");
     }
 
     public List<String> getCodesOf(Guild guild) {

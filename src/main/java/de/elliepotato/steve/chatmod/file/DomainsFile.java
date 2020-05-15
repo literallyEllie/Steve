@@ -1,4 +1,4 @@
-package de.elliepotato.steve.chatmod;
+package de.elliepotato.steve.chatmod.file;
 
 import com.google.common.collect.Sets;
 import de.elliepotato.steve.Steve;

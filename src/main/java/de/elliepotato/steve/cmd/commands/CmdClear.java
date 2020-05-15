@@ -34,19 +34,20 @@ public class CmdClear extends Command {
         int amount;
         try {
             amount = Integer.parseInt(args[0]);
-            if (amount < 1 || amount > 50) throw new NumberFormatException();
+            if (amount < 1 || amount > 50)
+                throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            getBot().tempMessage(channel, ":x: " + member.getAsMention() + ", please specify a number between 1 and 50.", 10, null);
+            environment.replyBadSyntax(member.getAsMention() + ", please specify a number between 1 and 50.");
             return;
         }
 
         channel.getHistory().retrievePast(amount + 1).queue(messages -> {
             if (messages != null) {
                 try {
-                    channel.deleteMessages(messages).queue(success -> getBot().tempMessage(channel,
-                            ":thumbsup: Cleared " + amount + " messages.", 10, null));
+                    channel.deleteMessages(messages).queue(success ->
+                                    environment.replyTemp(":thumbsup: Cleared " + amount + " messages.", 10, null));
                 } catch (IllegalArgumentException e) {
-                    getBot().tempMessage(channel, ":x: Failed to delete some messages as they are too old to touch", 7, null);
+                    environment.replyBadSyntax("Failed to delete some messages as they are too old to touch");
                 }
             }
         });

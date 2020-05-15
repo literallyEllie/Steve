@@ -34,7 +34,7 @@ public class CmdSlowMode extends Command {
                 newMode = Integer.parseInt(args[0]);
                 if (newMode < 0 || newMode > 21600) throw new NumberFormatException();
             } catch (NumberFormatException e) {
-                getBot().tempMessage(channel, ":x: " + environment.getSender().getAsMention() + ", please specify a number between 1 and 21600.", 10, null);
+                environment.replyBadSyntax(":x: " + environment.getSender().getAsMention() + ", please specify a number between 1 and 21600.");
                 return;
             }
 
@@ -55,7 +55,7 @@ public class CmdSlowMode extends Command {
 
                 });
 
-        getBot().messageChannel(channel, ":thumbsup: " + (newMode != 0 ? "Enabled (" + newMode + "s delay)" : "Disabled") + " slow-mode for the server.");
+        environment.replySuccess((newMode != 0 ? "Enabled (" + newMode + "s delay)" : "Disabled") + " slow-mode for the server.");
         getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL)
                 .setTitle((newMode != 0 ? "Enabled" : "Disabled") + " slow-mode for the server.")
                 .addField("Delay:", newMode + "s", false)

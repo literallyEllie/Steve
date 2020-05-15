@@ -36,11 +36,12 @@ public class CmdFixTimings extends Command {
         Matcher matcher = BROKEN_TIMINGS_REGEX.matcher(link);
 
         if (!matcher.matches()) {
-            getBot().messageChannel(environment.getChannel(), ":x: Not broken or invalid link.");
+            environment.replyBadSyntax("Not broken or invalid link.");
             return;
         }
 
-        getBot().messageChannel(environment.getChannel(), ":thumbsup: Try this: " + CORRECT_TIMINGS_URL + matcher.group(1));
+        environment.replySuccess("Try this: " +  CORRECT_TIMINGS_URL + matcher.group(1));
+
     }
 
 }

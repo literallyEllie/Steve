@@ -7,6 +7,8 @@ import de.elliepotato.steve.chatmod.checks.CheckTag;
 import de.elliepotato.steve.chatmod.checks.MessageHistory;
 import de.elliepotato.steve.chatmod.checks.help.DumbResponder;
 import de.elliepotato.steve.chatmod.checks.spam.CheckSpam;
+import de.elliepotato.steve.chatmod.file.BlacklistedDomainsFile;
+import de.elliepotato.steve.chatmod.file.DomainsFile;
 import de.elliepotato.steve.config.FileHandler;
 import de.elliepotato.steve.module.DataHolder;
 import de.elliepotato.steve.util.Constants;
@@ -23,11 +25,13 @@ import java.util.Set;
  */
 public class MessageChecker extends ListenerAdapter implements DataHolder {
 
-    public static final int MAX_MESSAGE_TAG = 8, MAX_AD_LINE = 8; // line breaks
-    private Steve bot;
+    public static final int MAX_MESSAGE_TAG = 5; // line breaks
+
+    private final Steve bot;
 
     private FileHandler<Set<String>> domainsFile, blacklistedFile;
-    private Set<String> allowedDomains, blacklistedDomains;
+    private Set<String> allowedDomains;
+    private Set<Long> ignoredUsers;
 
     private Set<MessageCheck> messageChecks;
 
@@ -41,13 +45,13 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         this.domainsFile = new DomainsFile(bot);
         this.allowedDomains = Sets.newHashSet();
         this.blacklistedFile = new BlacklistedDomainsFile(bot);
-        this.blacklistedDomains = Sets.newHashSet();
+        this.ignoredUsers = Sets.newHashSet();
+
         this.messageChecks = Sets.newHashSet(new CheckSpam(bot), new MessageHistory(bot), new CheckTag(this),
                 new CheckAdvert(this), new DumbResponder(bot));
 
         try {
             this.allowedDomains = domainsFile.read();
-            this.blacklistedDomains = blacklistedFile.read();
         } catch (IOException e) {
             bot.getLogger().error("Failed to load domains!", e);
             e.printStackTrace();
@@ -68,7 +72,9 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-        if (event.getAuthor().isBot() || event.getAuthor().getIdLong() == Constants.PRESUMED_SELF.getIdLong()) return;
+        if (event.getAuthor().isBot() || event.getAuthor().getIdLong() == Constants.PRESUMED_SELF.getIdLong()
+                || ignoredUsers.contains(event.getAuthor().getIdLong()))
+            return;
 
         long channelId = event.getChannel().getIdLong();
         if (channelId == Constants.CHAT_BISECT_MOD.getIdLong() || channelId == Constants.CHAT_MELON_MOD.getIdLong())
@@ -115,10 +121,19 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
     }
 
     /**
-     * @return The preloaded blacklisted domains.
+     * @return a set of ignored users which the bot will not monitor chat of
      */
-    public Set<String> getBlacklistedDomains() {
-        return blacklistedDomains;
+    public Set<Long> getIgnoredUsers() {
+        return ignoredUsers;
+    }
+
+    /**
+     * Sets a set of user IDs to ignore
+     *
+     * @param ignoredUsers the set of user ids to ignore.
+     */
+    public void setIgnoredUsers(Set<Long> ignoredUsers) {
+        this.ignoredUsers = ignoredUsers;
     }
 
     /**

@@ -97,7 +97,7 @@ public class SteveConsole extends Thread {
                                 break;
                             }
                             final String message = UtilString.getFinalArg(args, 2);
-                            steve.getJda().getTextChannelById(channel).sendMessage(message).queue();
+                            steve.messageChannel(channel, message);
                             steve.getLogger().info("Sent message '" + message + "' to '" + channel + "'.");
                         }
                         break;

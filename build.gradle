@@ -17,7 +17,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'de.elliepotato.steve'
-version '1.4.7-RELEASE'
+version '1.5-DEV'
 
 mainClassName = "de.elliepotato.steve.Main"
 
@@ -45,15 +45,13 @@ dependencies {
 
     // Backend
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.15'
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.1'
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.4.3'
 
     // Util
     compile group: 'com.google.guava', name: 'guava', version: 'r05' // google utils
     compile group: 'org.reflections', name: 'reflections', version: '0.9.11' // command registerer
     compile 'net.jodah:expiringmap:0.5.8' // expiring hashmaps lol
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.25' // Logging
-//    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25' // Logging
-//    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25' // Logging
 
     // JSON
     compile "com.github.Arraying:Kotys:0.5.1"

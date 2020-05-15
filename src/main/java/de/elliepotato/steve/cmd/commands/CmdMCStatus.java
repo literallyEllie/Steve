@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Ellie for VentureNode LLC
@@ -23,7 +24,7 @@ import java.util.TimerTask;
  */
 public class CmdMCStatus extends Command {
 
-    private FetcherMCStatus mcStatus;
+    private final FetcherMCStatus mcStatus;
 
     /**
      * Check the current status of all official Mojang endpoints.
@@ -31,7 +32,7 @@ public class CmdMCStatus extends Command {
      * @param steve Bot instance.
      */
     public CmdMCStatus(Steve steve) {
-        super(steve, "mcstatus", "Shows the current status of the Minecraft Servies", Lists.newArrayList(), Permission.MESSAGE_WRITE);
+        super(steve, "mcstatus", "Shows the current status of the Minecraft Services", Lists.newArrayList(), Permission.MESSAGE_WRITE);
 
         mcStatus = new FetcherMCStatus(steve);
         new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -39,21 +40,19 @@ public class CmdMCStatus extends Command {
             public void run() {
                 mcStatus.fetch();
             }
-        }, 120000, 300000);
-
+        }, TimeUnit.MINUTES.toMillis(2), TimeUnit.MINUTES.toMillis(5));
     }
 
     @Override
     protected void abstractExecute(@NotNull CommandEnvironment environment) {
-
         if (mcStatus.getLastFetch() == null) {
-            getBot().messageChannel(environment.getChannel(), "The statuses has not been fetched yet. Check back shortly :smile:");
+            environment.reply("The statuses has not been fetched yet. Check back shortly :smile:");
             return;
         }
 
         final EmbedBuilder embedBuilder = UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.NEUTRAL);
         embedBuilder.setTitle("Minecraft Server status")
-                .setDescription("These stats are collected every 5 minutes");
+                .setDescription("These stats are refreshed every 5 minutes");
 
         for (Map.Entry<MCService, MCServiceStatus> mcServiceMCServiceStatusEntry : mcStatus.getLastFetch().entrySet()) {
             final MCService service = mcServiceMCServiceStatusEntry.getKey();
@@ -62,10 +61,10 @@ public class CmdMCStatus extends Command {
             embedBuilder.addField(service.getPrettyName(), status.getPretty(), true);
         }
 
+        embedBuilder.addField("Last Refresh", "vvvvv", true);
         embedBuilder.setTimestamp(Instant.ofEpochMilli(mcStatus.lastFetch()));
 
-        getBot().messageChannel(environment.getChannel(), embedBuilder.build());
-
+        environment.reply(embedBuilder.build());
     }
 
     public FetcherMCStatus getMcStatus() {
