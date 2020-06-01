@@ -69,7 +69,6 @@ public class CheckSpam implements MessageCheck {
             boolean bisect = guildId == Constants.GUILD_BISECT.getIdLong();
 
             final Guild guildById = steve.getJda().getGuildById(guildId);
-            long everyoneId = bisect ? Constants.ROLE_BISECT_EVERYONE.getIdLong() : Constants.ROLE_MELON_EVERYONE.getIdLong();
 
             if (alerted) {
                 steve.getLogger().info("[SPAM-ALERT] " + guildId + " likely under attack (VL " + violationLevel + ")");
@@ -79,7 +78,7 @@ public class CheckSpam implements MessageCheck {
                         "from a regular member. To disable/if this is a false flag, do `!steve ok "
                         + (bisect ? "" : "m") + "`");
 
-                guildById.getRoleById(everyoneId).getManager()
+                guildById.getPublicRole().getManager()
                         .revokePermissions(Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_WRITE);
             } else {
                 steve.getLogger().info("[SPAM-ALERT] " + guildId + " restrictions have been turned off.");
@@ -87,7 +86,7 @@ public class CheckSpam implements MessageCheck {
                         (bisect ? "Bisect" : "Melon") + " Discord** is no longer detected to be " +
                         "under attack and restrictions have been disabled.");
 
-                guildById.getRoleById(everyoneId).getManager()
+                guildById.getPublicRole().getManager()
                         .givePermissions(Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_WRITE);
             }
 

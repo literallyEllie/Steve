@@ -91,13 +91,7 @@ public class CmdSteve extends Command {
                     env.reply("Manually resetting spam restrictions for server " + targetGuild.getName());
 
                     if (((CheckSpam) messageCheck).manualReset(guild)) {
-
-                        final Role everyoneRole  = targetGuild.getRoleById(guild == Constants.GUILD_BISECT.getIdLong() ? Constants.ROLE_BISECT_EVERYONE.getIdLong()
-                                : Constants.ROLE_MELON_EVERYONE.getIdLong());
-                        if (everyoneRole == null) {
-                            env.reply(":x: The @-everyone role was not found for the target server.");
-                            return;
-                        }
+                        final Role everyoneRole  = targetGuild.getPublicRole();
 
                         everyoneRole.getManager().givePermissions(Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_WRITE);
 

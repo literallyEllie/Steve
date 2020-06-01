@@ -24,8 +24,8 @@ public class CmdDomains extends Command {
      * @param steve The bot instance
      */
     public CmdDomains(Steve steve) {
-        super(steve, "domains", "Domain whitelist management", Lists.newArrayList("domain"), Permission.MESSAGE_MANAGE,
-                "<whitelist> <domain.com>");
+        super(steve, "whitelist", "Domain whitelist management", Lists.newArrayList("domain", "domains"), Permission.MESSAGE_MANAGE,
+                "<domain.com>");
     }
 
     @Override
@@ -34,9 +34,15 @@ public class CmdDomains extends Command {
 
         switch (args[0].toLowerCase()) {
             case "whitelist":
+                environment.replyBadSyntax("This command is updated, " + correctUsage());
+                break;
+            case "blacklist":
+                environment.replyBadSyntax("Blacklisted domains are no longer needed.");
+                break;
+            default:
                 MessageChecker messageChecker = getBot().getMessageChecker();
 
-                String stripped = args[1].toLowerCase().replaceAll("http?s/{2}", "").replace("/", "").trim();
+                String stripped = args[0].toLowerCase().replaceAll("http?s/{2}", "").replace("/", "").trim();
 
                 if (messageChecker.getAllowedDomains().contains(stripped)) {
                     environment.replyBadSyntax("This domain is already whitelisted.");
@@ -51,12 +57,6 @@ public class CmdDomains extends Command {
                     environment.replyBadSyntax(":x: Failed to write domains to file!");
                     e.printStackTrace();
                 }
-                break;
-            case "blacklist":
-                environment.replyBadSyntax("Blacklisted domains are no longer needed.");
-                break;
-            default:
-                environment.reply(correctUsage());
         }
 
     }

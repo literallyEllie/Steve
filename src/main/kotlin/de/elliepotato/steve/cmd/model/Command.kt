@@ -43,7 +43,7 @@ abstract class Command(val bot: Steve, val label: String, var description: Strin
             bot.logger.info(environment.toString())
             abstractExecute(environment)
         } catch (ex: Throwable) {
-            bot.messageChannel(environment.channel, ":x: Error whilst executing that command (${ex.message})")
+            bot.messageChannel(environment.channel, ":x: Error whilst executing that command (${ex.cause}: ${ex.message})")
             bot.logger.error("Failed to execute command $label!")
             ex.printStackTrace()
         }
