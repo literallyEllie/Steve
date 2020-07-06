@@ -9,6 +9,7 @@ import de.elliepotato.steve.config.JSONConfig;
 import de.elliepotato.steve.console.SteveConsole;
 import de.elliepotato.steve.mysql.MySQLManager;
 import de.elliepotato.steve.react.ReactManager;
+import de.elliepotato.steve.sheets.SheetsApi;
 import de.elliepotato.steve.util.Constants;
 import de.elliepotato.steve.util.DebugWriter;
 import net.dv8tion.jda.api.*;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.5.2-RELEASE";
+    public static final String VERSION = "1.5.3-DEV";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger(Steve.class);
@@ -52,6 +53,8 @@ public class Steve {
     private MessageChecker messageChecker;
 
     private BoosterWatcher boosterWatcher;
+
+    private SheetsApi sheetsApi;
 
     private SteveConsole steveConsole;
 
@@ -142,6 +145,8 @@ public class Steve {
         this.customCommandManager = new CustomCommandManager(this);
 
         this.boosterWatcher = new BoosterWatcher(this);
+
+        sheetsApi = new SheetsApi(this);
 
         LOGGER.info("Steve startup completed in " + (System.currentTimeMillis() - start) + "ms. Console thread starting.");
         this.steveConsole = new SteveConsole(this);
@@ -264,6 +269,13 @@ public class Steve {
      */
     public BoosterWatcher getBoosterWatcher() {
         return boosterWatcher;
+    }
+
+    /**
+     * @return sheets api for interacting with Google sheets
+     */
+    public SheetsApi getSheetsApi() {
+        return sheetsApi;
     }
 
     /**

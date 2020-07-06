@@ -54,7 +54,7 @@ public class CheckSpam implements MessageCheck {
         handle.onMessage();
 
         if (handle.isAlerted()) {
-            steve.getLogger().info("[SPAM-ALERT] (" + guild.getIdLong() + ") DEL (" + message.getIdLong() + ") " + message.getContentRaw());
+            steve.getLogger().info("[SPAM-ALERT] (" + message.getChannel().getId() + ") DEL (" + message.getIdLong() + ") " + message.getContentRaw());
             message.delete().queue();
             return false;
         }

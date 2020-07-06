@@ -30,6 +30,9 @@ public class CmdDomains extends Command {
 
     @Override
     protected void abstractExecute(@NotNull CommandEnvironment environment) {
+        environment.replyBadSyntax("Refer to MEEE6 for domain management");
+
+        /*
         final String[] args = environment.getArgs();
 
         switch (args[0].toLowerCase()) {
@@ -58,8 +61,8 @@ public class CmdDomains extends Command {
                     e.printStackTrace();
                 }
         }
+         */
 
     }
-
 
 }

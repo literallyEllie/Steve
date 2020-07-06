@@ -16,7 +16,7 @@ public class CheckAdvert implements MessageCheck {
 
     private final Pattern REGEX_DOMAIN = Pattern.compile("\\b((https?:/{2}(w{3}\\.)?)|(w{3}\\.))([^:/\\?\\=]+)\\b", Pattern.MULTILINE);
 
-    private MessageChecker messageChecker;
+    private final MessageChecker messageChecker;
 
     public CheckAdvert(MessageChecker messageChecker) {
         this.messageChecker = messageChecker;

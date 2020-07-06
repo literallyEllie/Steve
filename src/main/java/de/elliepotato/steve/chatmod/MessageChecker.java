@@ -48,7 +48,7 @@ public class MessageChecker extends ListenerAdapter implements DataHolder {
         this.ignoredUsers = Sets.newHashSet();
 
         this.messageChecks = Sets.newHashSet(new CheckSpam(bot), new MessageHistory(bot), new CheckTag(this),
-                new CheckAdvert(this), new DumbResponder(bot));
+                /*new CheckAdvert(this), */ new DumbResponder(bot));
 
         try {
             this.allowedDomains = domainsFile.read();

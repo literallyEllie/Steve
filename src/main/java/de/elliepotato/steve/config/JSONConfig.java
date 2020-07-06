@@ -36,6 +36,9 @@ public class JSONConfig {
     @JSONField(key = "sql-password")
     private String sqlPassword;
 
+    @JSONField(key= "sheets-auth-key")
+    private String sheetsAuthKey;
+
     /**
      * A JSON config handler
      */
@@ -65,7 +68,8 @@ public class JSONConfig {
                 .put("sql-port", 3306)
                 .put("sql-database", "database")
                 .put("sql-username", "username")
-                .put("sql-password", "passord");
+                .put("sql-password", "passord")
+                .put("sheets-auth-key", "auth-key");
 
         final BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(template.marshal());
@@ -173,6 +177,13 @@ public class JSONConfig {
      */
     public String getSqlPassword() {
         return sqlPassword;
+    }
+
+    /**
+     * @return auth key for sheets, optional.
+     */
+    public String getSheetsAuthKey() {
+        return sheetsAuthKey;
     }
 
     /**
