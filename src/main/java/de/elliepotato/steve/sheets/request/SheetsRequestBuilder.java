@@ -27,7 +27,7 @@ public class SheetsRequestBuilder {
 
     /**
      * Set the spreadsheet id.
-     *
+     * <p>
      * In a normal URL it would be placed here https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/...
      *
      * @param spreadSheetId the spreadsheet id
@@ -40,7 +40,7 @@ public class SheetsRequestBuilder {
 
     /**
      * Sets the sheet name to use
-     *
+     * <p>
      * It is the full name as shown on the web view.
      *
      * @param sheetName the sheet name to use
@@ -53,7 +53,7 @@ public class SheetsRequestBuilder {
 
     /**
      * Set the lower selection bound for getting values.
-     *
+     * <p>
      * This would be like selecting A1 to A3 thus A1 is the lower.
      *
      * @param lowerBound the lower bound to select
@@ -66,7 +66,7 @@ public class SheetsRequestBuilder {
 
     /**
      * Set the upper selection bound for getting values.
-     *
+     * <p>
      * This would be like selecting A1 to A3 thus A3 is the upper.
      *
      * @param upperBound the upper bound to select
@@ -79,7 +79,7 @@ public class SheetsRequestBuilder {
 
     /**
      * Constructs a URl to make a request to for the provided data.
-     *
+     * <p>
      * Preconditions are done to ensure everything is not-null or will throw an exception
      *
      * @param authKey the auth key to use

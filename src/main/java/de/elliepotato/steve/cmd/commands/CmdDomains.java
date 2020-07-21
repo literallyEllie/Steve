@@ -2,14 +2,10 @@ package de.elliepotato.steve.cmd.commands;
 
 import com.google.common.collect.Lists;
 import de.elliepotato.steve.Steve;
-import de.elliepotato.steve.chatmod.MessageChecker;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 
 /**
  * @author Ellie for VentureNode LLC

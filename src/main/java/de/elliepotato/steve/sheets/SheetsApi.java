@@ -1,7 +1,5 @@
 package de.elliepotato.steve.sheets;
 
-import com.google.common.collect.Lists;
-import com.mysql.cj.xdevapi.JsonArray;
 import de.arraying.kotys.JSON;
 import de.arraying.kotys.JSONArray;
 import de.elliepotato.steve.Steve;
@@ -11,7 +9,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.util.List;
 
 public class SheetsApi {
 
@@ -22,7 +19,7 @@ public class SheetsApi {
 
     /**
      * Sheets API wrapper
-     *
+     * <p>
      * Only supports reading for now.
      */
     public SheetsApi(Steve steve) {
@@ -51,6 +48,9 @@ public class SheetsApi {
             JSON parsedResponse = new JSON(rawResponse);
 
             final JSONArray jsonValues = parsedResponse.array("values");
+            if (jsonValues == null) {
+                return null;
+            }
 
             String[][] values = new String[jsonValues.length()][];
 

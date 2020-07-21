@@ -45,7 +45,7 @@ public class CmdClear extends Command {
             if (messages != null) {
                 try {
                     channel.deleteMessages(messages).queue(success ->
-                                    environment.replyTemp(":thumbsup: Cleared " + amount + " messages.", 10, null));
+                            environment.replyTemp(":thumbsup: Cleared " + amount + " messages.", 10, null));
                 } catch (IllegalArgumentException e) {
                     environment.replyBadSyntax("Failed to delete some messages as they are too old to touch");
                 }

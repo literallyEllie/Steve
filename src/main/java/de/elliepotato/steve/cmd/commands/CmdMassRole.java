@@ -2,7 +2,6 @@ package de.elliepotato.steve.cmd.commands;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.cmd.model.Command;
 import de.elliepotato.steve.cmd.model.CommandEnvironment;
@@ -19,7 +18,7 @@ import java.util.regex.Pattern;
 
 public class CmdMassRole extends Command {
 
-    private static final Pattern PATTERN_URL = Pattern.compile("https://docs\\.google\\.com/spreadsheets/d/([a-zA-Z0-9-_]+)/.*");
+    private static final Pattern PATTERN_URL = Pattern.compile("https://docs\\.google\\.com/spreadsheets/d/([a-zA-Z0-9-_]+)(/.*)?");
 
     public CmdMassRole(Steve steve) {
         super(steve, "massrole", "Mass modification of roles (using Sheets API, read from second row)", Lists.newArrayList(),
@@ -119,18 +118,17 @@ public class CmdMassRole extends Command {
             final Member member = guild.getMember(user);
 
             if (addRole) {
-                guild.addRoleToMember(member, role);
+                guild.addRoleToMember(member, role).queue();
             } else
-                guild.removeRoleFromMember(member, role);
+                guild.removeRoleFromMember(member, role).queue();
             successCount++;
         }
 
         if (successCount > 0) {
-            environment.replySuccess(addRole ? "Gave" : "Removed" + " the role to " + successCount + " users");
+            environment.replySuccess((addRole ? "Gave" : "Removed") + " the role to " + successCount + " users");
         }
         if (!errors.isEmpty()) {
             environment.reply("There were issues giving/taking to:\n" + Joiner.on("\n").join(errors));
-
         }
 
     }

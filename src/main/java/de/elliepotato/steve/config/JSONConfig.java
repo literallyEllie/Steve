@@ -36,7 +36,7 @@ public class JSONConfig {
     @JSONField(key = "sql-password")
     private String sqlPassword;
 
-    @JSONField(key= "sheets-auth-key")
+    @JSONField(key = "sheets-auth-key")
     private String sheetsAuthKey;
 
     /**

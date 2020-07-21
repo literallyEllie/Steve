@@ -2,7 +2,6 @@ package de.elliepotato.steve.chatmod;
 
 import com.google.common.collect.Sets;
 import de.elliepotato.steve.Steve;
-import de.elliepotato.steve.chatmod.checks.CheckAdvert;
 import de.elliepotato.steve.chatmod.checks.CheckTag;
 import de.elliepotato.steve.chatmod.checks.MessageHistory;
 import de.elliepotato.steve.chatmod.checks.help.DumbResponder;

@@ -1,14 +1,11 @@
 package de.elliepotato.steve.chatmod.checks.spam;
 
 import com.google.common.collect.Maps;
-import com.sun.javafx.tk.PermissionHelper;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.chatmod.MessageCheck;
 import de.elliepotato.steve.util.Constants;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 
 import java.util.HashMap;

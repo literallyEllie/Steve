@@ -40,7 +40,7 @@ public class CmdFixTimings extends Command {
             return;
         }
 
-        environment.replySuccess("Try this: " +  CORRECT_TIMINGS_URL + matcher.group(1));
+        environment.replySuccess("Try this: " + CORRECT_TIMINGS_URL + matcher.group(1));
     }
 
 }

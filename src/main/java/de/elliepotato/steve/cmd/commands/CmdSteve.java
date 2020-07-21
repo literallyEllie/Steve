@@ -91,7 +91,7 @@ public class CmdSteve extends Command {
                     env.reply("Manually resetting spam restrictions for server " + targetGuild.getName());
 
                     if (((CheckSpam) messageCheck).manualReset(guild)) {
-                        final Role everyoneRole  = targetGuild.getPublicRole();
+                        final Role everyoneRole = targetGuild.getPublicRole();
 
                         everyoneRole.getManager().givePermissions(Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_WRITE);
 

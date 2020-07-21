@@ -1,10 +1,12 @@
 package de.elliepotato.steve.cmd.model
 
 import com.google.common.base.Joiner
-import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.entities.TextChannel
 import net.dv8tion.jda.api.exceptions.ErrorResponseException
 import java.util.concurrent.TimeUnit
-import java.util.function.Consumer
 
 /**
  * @author Ellie for VentureNode LLC
