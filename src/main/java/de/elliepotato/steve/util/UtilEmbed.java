@@ -41,7 +41,8 @@ public class UtilEmbed {
         final User author = message.getAuthor();
         return getEmbedBuilder(EmbedColor.MESSAGE_DELETE)
                 .setTitle("Deleted message from " + author.getName() + "#" + author.getDiscriminator() + " (" + author.getIdLong() + ")" +
-                        " in channel #" + channel.getName()).addField("Message content:", message.getContentRaw(), false)
+                        " in channel #" + channel.getName()).addField("Message content:",
+                        message.getContentRaw().substring(0, Math.min(message.getContentRaw().length(), 1024)), false)
                 .addField("Reason:", reason, false);
     }
 
@@ -55,7 +56,7 @@ public class UtilEmbed {
 
         NEUTRAL(new Color(24, 165, 45));
 
-        private Color color;
+        private final Color color;
 
         EmbedColor(Color color) {
             this.color = color;

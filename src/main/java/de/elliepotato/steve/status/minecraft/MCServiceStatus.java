@@ -11,7 +11,7 @@ public enum MCServiceStatus {
     RED("Bad :("),
     UNKNOWN("Unknown");
 
-    private String pretty;
+    private final String pretty;
 
     MCServiceStatus(String pretty) {
         this.pretty = pretty;

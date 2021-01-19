@@ -35,42 +35,41 @@ public class CmdKick extends Command {
         final Member sender = environment.getSender();
         final String[] args = environment.getArgs();
 
-        final User toKick = getBot().parseUser(args[0]);
-        if (toKick == null) {
-            environment.replyBadSyntax(sender.getAsMention() + ", I couldn't find user `" + args[0] + "`.");
-            return;
-        }
+        getBot().parseMember(channel.getGuild(), args[0], toKick -> {
+            if (toKick == null) {
+                environment.replyBadSyntax(sender.getAsMention() + ", I couldn't find user `" + args[0] + "`.");
+                return;
+            }
 
-        if (!PermissionUtil.canInteract(sender, channel.getGuild().getMember(toKick))) {
-            getBot().messageChannel(channel, ":x: You cannot kick that person!");
-            return;
-        }
+            if (!PermissionUtil.canInteract(sender, toKick)) {
+                getBot().messageChannel(channel, "You cannot kick that person!");
+                return;
+            }
 
-        if (!PermissionUtil.canInteract(channel.getGuild().getSelfMember(), channel.getGuild().getMember(toKick))) {
-            environment.replyBadSyntax(":x: I cannot kick that person!");
-            return;
-        }
+            if (!PermissionUtil.canInteract(channel.getGuild().getSelfMember(), toKick)) {
+                environment.replyBadSyntax("I cannot kick that person!");
+                return;
+            }
 
-        String reason = null;
-        if (args.length > 1) {
-            reason = UtilString.getFinalArg(args, 1);
-        }
+            String reason = null;
+            if (args.length > 1) {
+                reason = UtilString.getFinalArg(args, 1);
+            }
 
+            String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
 
-        String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
+            channel.getGuild().kick(toKick, reason != null ?
+                    "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
 
-        channel.getGuild().kick(channel.getGuild().getMember(toKick), reason != null ?
-                "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
+            getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.KICK)
+                    .setTitle("Kicked " + toKick.getUser().getName() + "#" + toKick.getUser().getDiscriminator() + " (" + toKick.getId() + ")")
+                    .addField("Kicker", signature, true)
+                    .addField("Reason", (reason != null ? reason : "No reason specified."), false));
 
-        getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.KICK)
-                .setTitle("Kicked " + toKick.getName() + "#" + toKick.getDiscriminator() + " (" + toKick.getId() + ")")
-                .addField("Kicker", signature, true)
-                .addField("Reason", (reason != null ? reason : "No reason specified."), false));
+            environment.replySuccess("Kicked " + toKick.getUser().getName() + "#" + toKick.getUser().getDiscriminator() + " out this world. :eyes:"
+                    + (reason != null ? " (`" + reason + "`)" : ""));
 
-        environment.replySuccess("Kicked " + toKick.getName() + "#" + toKick.getDiscriminator() + " out this world. :eyes:"
-                + (reason != null ? " (`" + reason + "`)" : ""));
-
-
+        });
     }
 
 }

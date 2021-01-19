@@ -1,6 +1,7 @@
 package de.elliepotato.steve;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import de.elliepotato.steve.booster.BoosterWatcher;
 import de.elliepotato.steve.chatmod.MessageChecker;
 import de.elliepotato.steve.cmd.CommandManager;
@@ -15,13 +16,18 @@ import de.elliepotato.steve.util.DebugWriter;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +37,7 @@ import java.util.regex.Pattern;
  */
 public class Steve {
 
-    public static final String VERSION = "1.5.3-DEV";
+    public static final String VERSION = "1.5.5-RELEASE";
     public static final String[] AUTHORS = {"Ellie#0006"};
 
     private final Logger LOGGER = LoggerFactory.getLogger(Steve.class);
@@ -43,7 +49,7 @@ public class Steve {
     private JSONConfig config;
 
     private JDA jda;
-    private Thread mainThread;
+    private final Thread mainThread;
 
     private CommandManager commandManager;
     private MySQLManager sqlManager;
@@ -128,8 +134,11 @@ public class Steve {
 
         // Setup JDA (blocking).
         try {
-            jda = new JDABuilder(AccountType.BOT)
-                    .setToken(config.getBotToken())
+            jda = JDABuilder.createDefault(config.getBotToken())
+                    .enableIntents(GatewayIntent.DIRECT_MESSAGES,
+                            GatewayIntent.GUILD_MEMBERS,
+                            GatewayIntent.GUILD_MESSAGES,
+                            GatewayIntent.GUILD_MESSAGE_REACTIONS)
                     // Playing is now DEFAULT
                     .setActivity(Activity.of(Activity.ActivityType.valueOf(config.getGameType().toUpperCase()), config.getGameOf())) // we already know its valid.
                     .setStatus(OnlineStatus.fromKey(config.getBotStatus().toLowerCase()))
@@ -387,43 +396,64 @@ public class Steve {
      * Will attempt to parse from: a raw ID, a mention or a User#Discrim
      *
      * @param input The input to parse from.
-     * @return the user or null if failed to parse
      */
-    public User parseUser(String input) {
+    public void parseMember(Guild guild, String input, Consumer<Member> memberConsumer) {
 
         // raw id
+
+        Long longId = null;
         try {
-            return jda.getUserById(Long.parseLong(input));
+            longId = Long.parseLong(input);
+
+            jda.retrieveUserById(longId).queue(user -> {
+
+                if (user != null) {
+                    memberConsumer.accept(guild.getMember(user));
+                } else
+                    memberConsumer.accept(null);
+
+            });
         } catch (NumberFormatException e) {
         }
+
+        if (longId != null)
+            return;
 
         // a mention
         final Matcher matcher = PATTERN_USER.matcher(input);
         if (matcher.matches()) {
             try {
-                return jda.getUserById(Long.parseLong(matcher.group(1)));
+                jda.retrieveUserById(Long.parseLong(matcher.group(1))).queue(user -> {
+
+                    if (user != null) {
+                        memberConsumer.accept(guild.getMember(user));
+                    } else
+                        memberConsumer.accept(null);
+
+                });
             } catch (NumberFormatException e) {
-                return null;
+                memberConsumer.accept(null);
             }
+
+            return;
         }
 
-        // accept user#discrim
         if (input.contains("#")) {
+            lookupMembers(guild, Lists.newArrayList(input)).onSuccess(members -> {
+                memberConsumer.accept(members.isEmpty() ? null : members.get(0));
+            });
 
-            final String[] parts = input.split("#");
-            final String name = parts[0];
-            final String discriminator = parts[1]; // not parsing to int cus 0006 == 6
-
-            for (final User user : jda.getUsersByName(name, true)) {
-                if (user.getName().equalsIgnoreCase(name) && user.getDiscriminator().equals(discriminator)) {
-                    return user;
-                }
-            }
-
+            return;
         }
 
-        return null;
+        memberConsumer.accept(null);
     }
 
+    public Task<List<Member>> lookupMembers(Guild guild, List<String> tags) {
+        return guild.findMembers(member -> {
+            final User user = member.getUser();
+            return tags.contains(user.getName() + "#" + user.getDiscriminator());
+        });
+    }
 
 }

@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class CheckSpam implements MessageCheck {
 
     private final Steve steve;
-    private HashMap<Long, GuildSpamViolationHandle> guildSpamViolationHandleMap;
+    private final HashMap<Long, GuildSpamViolationHandle> guildSpamViolationHandleMap;
 
     public CheckSpam(Steve steve) {
         this.steve = steve;

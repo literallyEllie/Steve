@@ -153,7 +153,11 @@ public class BoosterWatcher implements DataHolder, WatcherCallback {
 
         if (!report.toString().trim().isEmpty()) {
             for (Long reportRecipient : REPORT_RECIPIENTS) {
-                steve.getJda().getUserById(reportRecipient).openPrivateChannel().complete().sendMessage(report.toString()).queue();
+                final User recipientUser = steve.getJda().getUserById(reportRecipient);
+                if (recipientUser != null)
+                    recipientUser.openPrivateChannel().complete().sendMessage(report.toString()).queue();
+                else
+                    steve.getLogger().warn("could not report to UID " + reportRecipient);
             }
 
         }

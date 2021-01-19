@@ -37,28 +37,34 @@ public class CmdIgnore extends Command {
 
     @Override
     protected void abstractExecute(@NotNull CommandEnvironment environment) {
-        final User user = getBot().parseUser(environment.getArgs()[0]);
-        if (user == null) {
-            getBot().tempMessage(environment.getChannel(), ":x: Could not find a user from that query.", 10, environment.getMessage());
-            return;
-        }
 
-        final Set<Long> ignoredUsers = getBot().getMessageChecker().getIgnoredUsers();
-        if (ignoredUsers.contains(user.getIdLong())) {
-            ignoredUsers.remove(user.getIdLong());
-        } else {
-            ignoredUsers.add(user.getIdLong());
-        }
+        getBot().parseMember(environment.getChannel().getGuild(), environment.getArgs()[0], member -> {
 
-        try {
-            ignoreFile.write(ignoredUsers);
+            if (member == null) {
+                getBot().tempMessage(environment.getChannel(), ":x: Could not find a user from that query.", 10, environment.getMessage());
+                return;
+            }
 
-            getBot().messageChannel(environment.getChannel(), user.getName() + "#" + user.getDiscriminator() + " is now "
-                    + (ignoredUsers.contains(user.getIdLong()) ? " effectively immune from message check" : "no longer immune from message checks"));
-        } catch (IOException e) {
-            getBot().getLogger().error("failed to write ignored users", e);
-            getBot().messageChannel(environment.getChannel(), ":x: Failed to save new data due to I/O error but is effective temporarily.");
-        }
+            final User user = member.getUser();
+
+            final Set<Long> ignoredUsers = getBot().getMessageChecker().getIgnoredUsers();
+            if (ignoredUsers.contains(user.getIdLong())) {
+                ignoredUsers.remove(user.getIdLong());
+            } else {
+                ignoredUsers.add(user.getIdLong());
+            }
+
+            try {
+                ignoreFile.write(ignoredUsers);
+
+                getBot().messageChannel(environment.getChannel(), user.getName() + "#" + user.getDiscriminator() + " is now "
+                        + (ignoredUsers.contains(user.getIdLong()) ? " effectively immune from message check" : "no longer immune from message checks"));
+            } catch (IOException e) {
+                getBot().getLogger().error("failed to write ignored users", e);
+                getBot().messageChannel(environment.getChannel(), ":x: Failed to save new data due to I/O error but is effective temporarily.");
+            }
+
+        });
 
     }
 

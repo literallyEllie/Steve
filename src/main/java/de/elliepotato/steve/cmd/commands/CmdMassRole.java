@@ -12,9 +12,12 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class CmdMassRole extends Command {
 
@@ -75,7 +78,7 @@ public class CmdMassRole extends Command {
 
         StringBuilder sheetName = new StringBuilder();
         for (int i = 5; i < args.length; i++) {
-            sheetName.append(args[i] + " ");
+            sheetName.append(args[i]).append(" ");
         }
 
         SheetsRequestBuilder sheetsRequestBuilder = new SheetsRequestBuilder(SheetsRequestMode.READ)
@@ -95,41 +98,50 @@ public class CmdMassRole extends Command {
             return;
         }
 
-        List<String> errors = Lists.newArrayList();
         final Guild guild = channel.getGuild();
         boolean addRole = mode.equals("add");
 
-        int successCount = 0;
-        for (String[] discordIdArray : response) {
-            // discord id should be at 0
-            String discordId = discordIdArray[0];
+        AtomicInteger successCount = new AtomicInteger();
 
-            final User user = getBot().parseUser(discordId);
-            if (user == null) {
-                errors.add(discordId + " - invalid tag/left the server");
-                continue;
+        getBot().lookupMembers(guild, Arrays.stream(response)
+                .map(strings -> strings[0])
+                .collect(Collectors.toList())).onSuccess(members -> {
+
+            members.forEach(member -> {
+                if (addRole) {
+                    guild.addRoleToMember(member, role).queue();
+                } else
+                    guild.removeRoleFromMember(member, role).queue();
+
+                successCount.getAndIncrement();
+            });
+
+            if (successCount.get() < response.length) {
+                List<String> inconsistencies = Lists.newArrayList();
+
+                for (String[] strings : response) {
+                    final String tag = strings[0];
+
+                    boolean match = false;
+                    for (Member member : members) {
+                        if (tag.equals(member.getUser().getName() + "#" + member.getUser().getDiscriminator())) {
+                            match = true;
+                            break;
+                        }
+                    }
+
+                    if (!match)
+                        inconsistencies.add(tag + " - not in this Discord server");
+                }
+
+                environment.reply("There were issues giving/taking to:\n" + Joiner.on("\n").join(inconsistencies));
             }
 
-            if (!guild.isMember(user)) {
-                errors.add(discordId + " - not part of this server");
-                continue;
+            if (successCount.get() > 0) {
+                environment.replySuccess((addRole ? "Gave" : "Removed") + " the role to " + successCount.get() + " users");
             }
 
-            final Member member = guild.getMember(user);
-
-            if (addRole) {
-                guild.addRoleToMember(member, role).queue();
-            } else
-                guild.removeRoleFromMember(member, role).queue();
-            successCount++;
-        }
-
-        if (successCount > 0) {
-            environment.replySuccess((addRole ? "Gave" : "Removed") + " the role to " + successCount + " users");
-        }
-        if (!errors.isEmpty()) {
-            environment.reply("There were issues giving/taking to:\n" + Joiner.on("\n").join(errors));
-        }
+        });
 
     }
 

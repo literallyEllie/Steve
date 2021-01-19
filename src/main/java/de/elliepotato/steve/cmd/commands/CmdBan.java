@@ -34,39 +34,43 @@ public class CmdBan extends Command {
         final Member sender = environment.getSender();
         final String[] args = environment.getArgs();
 
-        final User toBan = getBot().parseUser(args[0]);
-        if (toBan == null) {
-            environment.replyBadSyntax(sender.getAsMention() + ", I couldn't find user `" + args[0] + "`.");
-            return;
-        }
+        getBot().parseMember(channel.getGuild(), args[0], toBan -> {
+            if (toBan == null) {
+                environment.replyBadSyntax(sender.getAsMention() + ", I couldn't find user `" + args[0] + "`.");
+                return;
+            }
 
-        if (!PermissionUtil.canInteract(sender, channel.getGuild().getMember(toBan))) {
-            environment.replyBadSyntax("You cannot ban that person.");
-            return;
-        }
+            if (!PermissionUtil.canInteract(sender, toBan)) {
+                environment.replyBadSyntax("You cannot ban that person.");
+                return;
+            }
 
-        if (!PermissionUtil.canInteract(channel.getGuild().getSelfMember(), channel.getGuild().getMember(toBan))) {
-            environment.replyBadSyntax("I cannot ban that person!");
-            return;
-        }
+            if (!PermissionUtil.canInteract(channel.getGuild().getSelfMember(), toBan)) {
+                environment.replyBadSyntax("I cannot ban that person!");
+                return;
+            }
 
-        String reason = null;
-        if (args.length > 1) {
-            reason = UtilString.getFinalArg(args, 1);
-        }
+            String reason = null;
+            if (args.length > 1) {
+                reason = UtilString.getFinalArg(args, 1);
+            }
 
-        String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
-        channel.getGuild().ban(channel.getGuild().getMember(toBan), 1, reason != null ?
-                "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
+            String signature = sender.getEffectiveName() + " (" + sender.getId() + ")";
+            channel.getGuild().ban(toBan, 1, reason != null ?
+                    "Issued by " + signature + " :: " + reason : "No reason specified from " + signature).queue();
 
-        // notify channels
-        getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.BAN)
-                .setTitle("Banned " + toBan.getName() + "#" + toBan.getDiscriminator() + " (" + toBan.getId() + ")")
-                .addField("Banner", signature, true)
-                .addField("Reason", (reason != null ? reason : "No reason specified."), false));
+            // notify channels
+            getBot().modLog(channel.getGuild(), UtilEmbed.getEmbedBuilder(UtilEmbed.EmbedColor.BAN)
+                    .setTitle("Banned " + toBan.getUser().getName() + "#" + toBan.getUser().getDiscriminator() + " (" + toBan.getId() + ")")
+                    .addField("Banner", signature, true)
+                    .addField("Reason", (reason != null ? reason : "No reason specified."), false));
 
-        environment.replySuccess("Banned " + toBan.getName() + "#" + toBan.getDiscriminator() + " out this world (forever)! :eyes:"
-                + (reason != null ? " (`" + reason + "`)" : ""));
+            environment.replySuccess("Banned " + toBan.getUser().getName() + "#" + toBan.getUser().getDiscriminator()  + " out this world (forever)! :eyes:"
+                    + (reason != null ? " (`" + reason + "`)" : ""));
+
+
+        });
+
     }
 
 }

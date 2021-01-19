@@ -1,6 +1,7 @@
 package de.elliepotato.steve.status.minecraft;
 
 import com.google.common.collect.Maps;
+import de.arraying.kotys.JSON;
 import de.arraying.kotys.JSONArray;
 import de.elliepotato.steve.Steve;
 import de.elliepotato.steve.status.StatusFetcher;
@@ -18,20 +19,24 @@ import java.util.Map;
  */
 public class FetcherMCStatus implements StatusFetcher<Map<MCService, MCServiceStatus>> {
 
-    private Steve steve;
+    private final Steve steve;
 
     private long lastFetch;
-    private Map<MCService, MCServiceStatus> lastResponse;
+    private final Map<MCService, MCServiceStatus> lastResponse;
 
     public FetcherMCStatus(Steve steve) {
         this.steve = steve;
+        this.lastResponse = Maps.newHashMap();
+
+        for (MCService service : MCService.values()) {
+            lastResponse.put(service, MCServiceStatus.UNKNOWN);
+        }
     }
 
     @Override
     public void fetch() {
-
         try {
-
+            // get data
             final URL url = new URL("https://status.mojang.com/check");
             final HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
@@ -46,24 +51,32 @@ public class FetcherMCStatus implements StatusFetcher<Map<MCService, MCServiceSt
             in.close();
             con.disconnect();
 
+            // returns an array of services and their respective status like [{"minecraft.net":"green"}, ..]
             final JSONArray json = new JSONArray(fullResponse.toString());
-
-            if (lastResponse == null)
-                lastResponse = Maps.newHashMap();
-            else lastResponse.clear();
+            // access {"minecraft.net":"green"}
 
             for (int i = 0; i < json.length(); i++) {
-                MCService service = MCService.values()[i];
-                final MCServiceStatus serviceStatus = MCServiceStatus.fromString(json.json(i).string(service.getRaw()));
+                final Map<String, Object> serviceStatus = json.json(i).raw();
 
-                lastResponse.put(service, serviceStatus);
+                for (MCService value : MCService.values()) {
+                    final Object status = serviceStatus.get(value.getRaw());
+
+                    if (status == null)
+                        continue;
+
+                    if ((!(status instanceof String))) {
+                        steve.getLogger().error("unrecognized status of " + serviceStatus);
+                        break;
+                    }
+
+                    lastResponse.put(value, MCServiceStatus.fromString((String) status));
+                }
             }
 
             lastFetch = System.currentTimeMillis();
 
         } catch (IOException e) {
-            steve.getLogger().error("Error whilst parsing Mojang response");
-            e.printStackTrace();
+            steve.getLogger().error("error whilst parsing Mojang response", e);
         }
 
     }

@@ -55,6 +55,6 @@ abstract class Command(val bot: Steve, val label: String, var description: Strin
      */
     @JvmOverloads
     fun correctUsage(moreStuff: String = "") = ":thumbsup: Correct usage: `${bot.config.commandPrefix}$label " +
-            "${if (moreStuff.isEmpty()) Joiner.on(", ").join(usage) else moreStuff}` **-** $description."
+            "${if (moreStuff.isEmpty()) Joiner.on(" ").join(usage) else moreStuff}` **-** $description."
 
 }
